@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "musann.",
-    "slug": "musann.",
+    "slug": "musann",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -37,6 +37,12 @@
           "dark": {
             "backgroundColor": "#000000"
           }
+        }
+      ],
+      [
+        "expo-audio",
+        {
+          "microphonePermission": "録音のためにマイクへのアクセスを許可してください。"
         }
       ]
     ],
