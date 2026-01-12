@@ -8,6 +8,8 @@ import {
   setAudioModeAsync,
 } from "expo-audio";
 import { useMemo, useState, useEffect } from "react";
+import { RecordButton } from "@/components/RecordButton";
+import { useSmoothCountdown } from "@/hooks/useSmoothCountdown";
 
 const MAX_MS = 30000;
 
@@ -21,9 +23,10 @@ export default function Index() {
   const player = useAudioPlayer(playerSource, { updateInterval: 250 });
 
   //残り秒の計算
-  const remainingSec = Math.max(
-    0,
-    Math.ceil((MAX_MS - (recorderState.durationMillis ?? 0)) / 1000)
+  const { remainingSecondsText } = useSmoothCountdown(
+    recorderState.durationMillis,
+    MAX_MS,
+    recorderState.isRecording
   );
 
   //マイク権限
@@ -84,19 +87,18 @@ export default function Index() {
   };
 
   return (
-    <View style={{ padding: 16, borderWidth: 1, borderRadius: 12, gap: 12 }}>
+    <View style={{ padding: 16, gap: 12, backgroundColor: "#B5B6B6", flex: 1 }}>
       <Text style={{ fontSize: 16 }}>
         状態：{recorderState.isRecording ? "録音中" : audioUri ? "録音済み" : "待機"}
       </Text>
 
-      <Text style={{ fontSize: 40, fontWeight: "800" }}>{remainingSec}</Text>
-      <Text style={{ color: "#666" }}>残り秒（30 → 0）</Text>
+      <Text style={{ fontSize: 40, fontWeight: "800" }}>{remainingSecondsText}</Text>
 
-      {!recorderState.isRecording ? (
-        <Button title="録音開始" onPress={startRecording} />
-      ) : (
-        <Button title="停止" onPress={stopRecording} />
-      )}
+      <RecordButton
+        isRecording={recorderState.isRecording}
+        onStart={() => startRecording()}
+        onStop={() => stopRecording()}
+      />
 
       <Button title="再生" onPress={play} disabled={!audioUri || recorderState.isRecording} />
 
