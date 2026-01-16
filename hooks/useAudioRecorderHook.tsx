@@ -1,6 +1,6 @@
 import { Alert } from "react-native";
 import { useAudioRecorder, RecordingPresets, useAudioRecorderState } from "expo-audio";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSmoothCountdown } from "@/hooks/useSmoothCountdown";
 
 const MAX_MS = 30000;
@@ -9,7 +9,8 @@ export default function Index() {
   const [audioUri, setAudioUri] = useState<string | null>(null);
 
   const recorder = useAudioRecorder({ ...RecordingPresets.HIGH_QUALITY, isMeteringEnabled: true });
-  const recorderState = useAudioRecorderState(recorder, 250);
+  const recorderState = useAudioRecorderState(recorder, 100);
+  const latestDecibel = useRef<number | null>(null);
 
   //残り秒の計算
   const { remainingSecondsText } = useSmoothCountdown(
@@ -17,6 +18,18 @@ export default function Index() {
     MAX_MS,
     recorderState.isRecording
   );
+
+  //最新のdb値を参照、30秒で自動停止
+  useEffect(() => {
+    if (!recorderState.isRecording) return;
+    if (recorderState.metering != null) {
+      latestDecibel.current = recorderState.metering;
+    }
+    if ((recorderState.durationMillis ?? 0) >= MAX_MS) {
+      stopRecording().catch(() => {});
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [recorderState.isRecording, recorderState.durationMillis]);
 
   //録音開始
   const startRecording = async () => {
@@ -44,20 +57,12 @@ export default function Index() {
     }
   };
 
-  //30秒で自動停止
-  useEffect(() => {
-    if (!recorderState.isRecording) return;
-    if ((recorderState.durationMillis ?? 0) >= MAX_MS) {
-      stopRecording().catch(() => {});
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [recorderState.isRecording, recorderState.durationMillis]);
-
   return {
     audioUri,
     recordingInProgress: recorderState.isRecording,
     startRecording,
     stopRecording,
     remainingSecondsText,
+    latestDecibel,
   };
 }
