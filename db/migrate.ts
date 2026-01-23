@@ -1,0 +1,33 @@
+import { LATEST_SCHEMA_SQL } from "./schema/latest";
+import * as m001 from "./migrations/001_";
+
+const MIGRATIONS = [m001];
+
+export async function migrate(db: any) {
+  const row = await db.getFirstAsync("PRAGMA user_version");
+  const current = row?.user_version ?? 0;
+
+  // 0: 新規インストール → 最新スキーマを一括作成
+  if (current === 0) {
+    await db.execAsync(`
+      BEGIN;
+      ${LATEST_SCHEMA_SQL}
+      COMMIT;
+    `);
+    return;
+  }
+
+  // 1以上: 差分を順番に適用して最新へ
+  for (const m of MIGRATIONS) {
+    if (current < m.VERSION) {
+      await db.execAsync("BEGIN;");
+      try {
+        await m.migrate(db);
+        await db.execAsync("COMMIT;");
+      } catch (e) {
+        await db.execAsync("ROLLBACK;");
+        throw e;
+      }
+    }
+  }
+}

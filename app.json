@@ -53,7 +53,8 @@
           "microphonePermission": "録音のためにマイクへのアクセスを許可してください。"
         }
       ],
-      "expo-asset"
+      "expo-asset",
+      "expo-sqlite"
     ],
     "experiments": {
       "typedRoutes": true,
