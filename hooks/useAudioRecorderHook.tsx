@@ -79,6 +79,14 @@ export default function Index() {
     }
   };
 
+  const resetRecording = () => {
+    setAudioUri(null);
+    setCreatedAt(null);
+    setDateKey(null);
+    setDurationMs(null);
+    setLocation(null);
+  };
+
   return {
     audioUri,
     recordingInProgress: recorderState.isRecording,
@@ -90,5 +98,6 @@ export default function Index() {
     createdAt,
     dateKey,
     durationMs,
+    resetRecording,
   };
 }

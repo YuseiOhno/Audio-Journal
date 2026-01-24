@@ -1,11 +1,12 @@
-import { Button, Alert, Text, View } from "react-native";
-import { useAudioPlayer, AudioModule, setAudioModeAsync } from "expo-audio";
+import { Alert, Text, View } from "react-native";
+import { AudioModule, setAudioModeAsync } from "expo-audio";
 import * as Location from "expo-location";
-import { useMemo, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { RecordButton } from "@/components/RecordButton";
 import WaveformDisplay from "@/components/WaveformDisplay";
 import LevelLineDisplay from "@/components/LevelLineDisplay";
 import useAudioRecorderHook from "@/hooks/useAudioRecorderHook";
+import { MemoModal } from "@/components/MemoModal";
 
 export default function Index() {
   const {
@@ -15,10 +16,11 @@ export default function Index() {
     stopRecording,
     remainingSecondsText,
     latestDecibel,
+    resetRecording,
   } = useAudioRecorderHook();
-
-  const playerSource = useMemo(() => audioUri ?? null, [audioUri]);
-  const player = useAudioPlayer(playerSource, { updateInterval: 250 });
+  const [memo, setMemo] = useState("");
+  const [memoVisible, setMemoVisible] = useState(false);
+  const lastAudioUriRef = useRef<string | null>(null);
 
   //マイク権限
   useEffect(() => {
@@ -46,15 +48,36 @@ export default function Index() {
     })();
   }, []);
 
-  //再生関数
-  const play = () => {
-    if (!audioUri) return;
-    player.seekTo(0);
-    player.play();
+  //audioUriが更新されるとモーダル表示
+  useEffect(() => {
+    if (audioUri && audioUri !== lastAudioUriRef.current) {
+      setMemo("");
+      setMemoVisible(true);
+      lastAudioUriRef.current = audioUri;
+    }
+  }, [audioUri]);
+
+  //モーダル：保存
+  const handleSaveMemo = () => {
+    setMemoVisible(false);
+  };
+
+  //モーダル：キャンセル
+  const handleRetry = () => {
+    setMemoVisible(false);
+    resetRecording();
+    lastAudioUriRef.current = null;
   };
 
   return (
     <View style={{ flex: 1, padding: 16, gap: 12, backgroundColor: "#B5B6B6" }}>
+      <MemoModal
+        visible={memoVisible}
+        memo={memo}
+        onChangeMemo={setMemo}
+        onSave={handleSaveMemo}
+        onRetry={handleRetry}
+      />
       <LevelLineDisplay recordingInProgress={recordingInProgress} latestDecibel={latestDecibel} />
 
       <View style={{ flex: 2 }}>

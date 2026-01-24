@@ -19,7 +19,7 @@ export default function WaveformDisplay({
     const interval = setInterval(() => {
       if (latestDecibel.current != null) {
         const normalized = Math.max(0, Math.min(1, (latestDecibel.current + 60) / 60));
-        const variation = 0.6 + Math.random() * 0.1; // WhatsApp wiggle
+        const variation = 0.6 + Math.random() * 0.1;
         const height = normalized * 60 * variation;
 
         waveformBuffer.push(height);
