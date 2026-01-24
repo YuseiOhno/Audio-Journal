@@ -1,7 +1,9 @@
 import { LATEST_SCHEMA_SQL } from "./schema/latest";
-import * as m001 from "./migrations/001_";
+import * as m001 from "./migrations/001_init";
+import * as m002 from "./migrations/002_add_recording_meta";
 
-const MIGRATIONS = [m001];
+//migrationsファイルが増えるごとに下記配列追加
+const MIGRATIONS = [m001, m002];
 
 export async function migrate(db: any) {
   const row = await db.getFirstAsync("PRAGMA user_version");
@@ -9,11 +11,14 @@ export async function migrate(db: any) {
 
   // 0: 新規インストール → 最新スキーマを一括作成
   if (current === 0) {
-    await db.execAsync(`
-      BEGIN;
-      ${LATEST_SCHEMA_SQL}
-      COMMIT;
-    `);
+    await db.execAsync("BEGIN;");
+    try {
+      await db.execAsync(LATEST_SCHEMA_SQL);
+      await db.execAsync("COMMIT;");
+    } catch (e) {
+      await db.execAsync("ROLLBACK;");
+      throw e;
+    }
     return;
   }
 

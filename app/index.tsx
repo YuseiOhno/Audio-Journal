@@ -1,5 +1,6 @@
 import { Button, Alert, Text, View } from "react-native";
 import { useAudioPlayer, AudioModule, setAudioModeAsync } from "expo-audio";
+import * as Location from "expo-location";
 import { useMemo, useEffect } from "react";
 import { RecordButton } from "@/components/RecordButton";
 import WaveformDisplay from "@/components/WaveformDisplay";
@@ -25,12 +26,23 @@ export default function Index() {
       const status = await AudioModule.requestRecordingPermissionsAsync();
       if (!status.granted) {
         Alert.alert("マイク権限が必要です", "設定でマイクを許可してください。");
-        return;
       }
-      await setAudioModeAsync({
-        playsInSilentMode: true,
-        allowsRecording: true,
-      });
+      if (status.granted) {
+        await setAudioModeAsync({
+          playsInSilentMode: true,
+          allowsRecording: true,
+        });
+      }
+    })();
+  }, []);
+
+  //位置情報権限
+  useEffect(() => {
+    (async () => {
+      const status = await Location.requestForegroundPermissionsAsync();
+      if (!status.granted) {
+        Alert.alert("位置情報の権限が必要です", "設定で位置情報の許可をお願いします。");
+      }
     })();
   }, []);
 

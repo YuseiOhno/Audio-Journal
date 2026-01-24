@@ -1,11 +1,18 @@
-export const LATEST_VERSION = 0;
+//migrateの度に更新
+export const LATEST_VERSION = 2;
 
 export const LATEST_SCHEMA_SQL = `
-CREATE TABLE IF NOT EXISTS recordings (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            date_key TEXT NOT NULL,
-            created_at TEXT NOT NULL,
-            audio_uri TEXT NOT NULL
+    CREATE TABLE IF NOT EXISTS recordings (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        date_key TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        audio_uri TEXT NOT NULL,
+        duration_ms INTEGER,
+        lat REAL,
+        lng REAL,
+        accuracy REAL,
+        location_at TEXT,
+        memo TEXT
     );
 
     PRAGMA user_version = ${LATEST_VERSION};

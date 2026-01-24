@@ -26,7 +26,8 @@
       "predictiveBackGestureEnabled": false,
       "permissions": [
         "android.permission.RECORD_AUDIO",
-        "android.permission.MODIFY_AUDIO_SETTINGS"
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.ACCESS_FINE_LOCATION"
       ]
     },
     "web": {
@@ -51,6 +52,12 @@
         "expo-audio",
         {
           "microphonePermission": "録音のためにマイクへのアクセスを許可してください。"
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "録音開始時に位置情報を取得します。"
         }
       ],
       "expo-asset",
