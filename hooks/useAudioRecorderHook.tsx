@@ -2,15 +2,25 @@ import { Alert } from "react-native";
 import { useAudioRecorder, RecordingPresets, useAudioRecorderState } from "expo-audio";
 import { useState, useEffect, useRef } from "react";
 import { useSmoothCountdown } from "@/hooks/useSmoothCountdown";
+import useFetchLocationOnce from "@/hooks/useFetchLocationOnce";
 
 const MAX_MS = 30000;
 
 export default function Index() {
   const [audioUri, setAudioUri] = useState<string | null>(null);
+  const [createdAt, setCreatedAt] = useState<string | null>(null);
+  const [dateKey, setDateKey] = useState<string | null>(null);
+  const [durationMs, setDurationMs] = useState<number | null>(null);
+  const [location, setLocation] = useState<{
+    lat: number;
+    lng: number;
+    accuracy: number | null;
+  } | null>(null);
 
   const recorder = useAudioRecorder({ ...RecordingPresets.HIGH_QUALITY, isMeteringEnabled: true });
   const recorderState = useAudioRecorderState(recorder, 100);
   const latestDecibel = useRef<number | null>(null);
+  const { fetchLocationOnce } = useFetchLocationOnce();
 
   //残り秒の計算
   const { remainingSecondsText } = useSmoothCountdown(
@@ -34,9 +44,20 @@ export default function Index() {
   //録音開始
   const startRecording = async () => {
     try {
+      const now = new Date();
+      const iso = now.toISOString();
+      setCreatedAt(iso);
+      setDateKey(iso.slice(0, 10));
       setAudioUri(null);
+      const locationPromise = fetchLocationOnce();
       await recorder.prepareToRecordAsync();
       recorder.record();
+      const loc = await locationPromise;
+      if (loc.ok) {
+        setLocation({ lat: loc.lat, lng: loc.lng, accuracy: loc.accuracy });
+      } else {
+        setLocation(null);
+      }
     } catch (e: any) {
       Alert.alert("録音開始に失敗しました", String(e?.message ?? e));
     }
@@ -52,6 +73,7 @@ export default function Index() {
         return;
       }
       setAudioUri(uri);
+      setDurationMs(recorderState.durationMillis ?? 0);
     } catch (e: any) {
       Alert.alert("録音停止に失敗しました", String(e?.message ?? e));
     }
@@ -64,5 +86,9 @@ export default function Index() {
     stopRecording,
     remainingSecondsText,
     latestDecibel,
+    location,
+    createdAt,
+    dateKey,
+    durationMs,
   };
 }
