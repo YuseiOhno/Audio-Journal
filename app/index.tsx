@@ -60,6 +60,8 @@ export default function Index() {
   //モーダル：保存
   const handleSaveMemo = () => {
     setMemoVisible(false);
+    resetRecording();
+    lastAudioUriRef.current = null;
   };
 
   //モーダル：キャンセル
