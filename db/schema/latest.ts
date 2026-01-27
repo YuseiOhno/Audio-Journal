@@ -11,7 +11,6 @@ export const LATEST_SCHEMA_SQL = `
         lat REAL,
         lng REAL,
         accuracy REAL,
-        location_at TEXT,
         memo TEXT
     );
 

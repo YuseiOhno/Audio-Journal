@@ -1,4 +1,4 @@
-import { Alert, Text, View } from "react-native";
+import { Alert, Text, View, KeyboardAvoidingView } from "react-native";
 import { AudioModule, setAudioModeAsync } from "expo-audio";
 import * as Location from "expo-location";
 import { useEffect, useRef, useState } from "react";
@@ -7,6 +7,7 @@ import WaveformDisplay from "@/components/WaveformDisplay";
 import LevelLineDisplay from "@/components/LevelLineDisplay";
 import useAudioRecorderHook from "@/hooks/useAudioRecorderHook";
 import { MemoModal } from "@/components/MemoModal";
+import { insertRecording, readRecordings } from "@/db/repositories/recordings";
 
 export default function Index() {
   const {
@@ -16,6 +17,10 @@ export default function Index() {
     stopRecording,
     remainingSecondsText,
     latestDecibel,
+    createdAt,
+    dateKey,
+    durationMs,
+    location,
     resetRecording,
   } = useAudioRecorderHook();
   const [memo, setMemo] = useState("");
@@ -58,10 +63,26 @@ export default function Index() {
   }, [audioUri]);
 
   //モーダル：保存
-  const handleSaveMemo = () => {
-    setMemoVisible(false);
-    resetRecording();
-    lastAudioUriRef.current = null;
+  const handleSaveDB = async () => {
+    if (!audioUri || !createdAt || !dateKey) return;
+    try {
+      await insertRecording({
+        dateKey,
+        createdAt,
+        audioUri,
+        durationMs,
+        lat: location?.lat ?? null,
+        lng: location?.lng ?? null,
+        accuracy: location?.accuracy ?? null,
+        memo: memo.trim() || null,
+      });
+      setMemoVisible(false);
+      setMemo("");
+      resetRecording();
+      lastAudioUriRef.current = null;
+    } catch (e: any) {
+      Alert.alert("保存に失敗しました", String(e?.message ?? e));
+    }
   };
 
   //モーダル：キャンセル
@@ -73,13 +94,15 @@ export default function Index() {
 
   return (
     <View style={{ flex: 1, padding: 16, gap: 12, backgroundColor: "#B5B6B6" }}>
-      <MemoModal
-        visible={memoVisible}
-        memo={memo}
-        onChangeMemo={setMemo}
-        onSave={handleSaveMemo}
-        onRetry={handleRetry}
-      />
+      <KeyboardAvoidingView behavior={"padding"}>
+        <MemoModal
+          visible={memoVisible}
+          memo={memo}
+          onChangeMemo={setMemo}
+          onSave={handleSaveDB}
+          onRetry={handleRetry}
+        />
+      </KeyboardAvoidingView>
       <LevelLineDisplay recordingInProgress={recordingInProgress} latestDecibel={latestDecibel} />
 
       <View style={{ flex: 2 }}>
