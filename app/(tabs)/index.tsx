@@ -7,7 +7,7 @@ import WaveformDisplay from "@/components/WaveformDisplay";
 import LevelLineDisplay from "@/components/LevelLineDisplay";
 import useAudioRecorderHook from "@/hooks/useAudioRecorderHook";
 import { MemoModal } from "@/components/MemoModal";
-import { insertRecording, readRecordings } from "@/db/repositories/recordings";
+import { insertRecording } from "@/db/repositories/recordings";
 
 export default function Index() {
   const {
@@ -23,6 +23,7 @@ export default function Index() {
     location,
     resetRecording,
   } = useAudioRecorderHook();
+
   const [memo, setMemo] = useState("");
   const [memoVisible, setMemoVisible] = useState(false);
   const lastAudioUriRef = useRef<string | null>(null);
