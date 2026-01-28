@@ -22,12 +22,13 @@ export default function Index() {
     durationMs,
     location,
     resetRecording,
-    MAX_MS
+    MAX_MS,
   } = useAudioRecorderHook();
 
   const [memo, setMemo] = useState("");
   const [memoVisible, setMemoVisible] = useState(false);
   const lastAudioUriRef = useRef<string | null>(null);
+  const waveformBufferRef = useRef<number[]>([]);
 
   //マイク権限
   useEffect(() => {
@@ -61,6 +62,7 @@ export default function Index() {
       setMemo("");
       setMemoVisible(true);
       lastAudioUriRef.current = audioUri;
+      console.log(waveformBufferRef.current);
     }
   }, [audioUri]);
 
@@ -81,6 +83,7 @@ export default function Index() {
       setMemoVisible(false);
       setMemo("");
       resetRecording();
+      waveformBufferRef.current = [];
       lastAudioUriRef.current = null;
     } catch (e: any) {
       Alert.alert("保存に失敗しました", String(e?.message ?? e));
@@ -91,6 +94,7 @@ export default function Index() {
   const handleRetry = () => {
     setMemoVisible(false);
     resetRecording();
+    waveformBufferRef.current = [];
     lastAudioUriRef.current = null;
   };
 
@@ -114,6 +118,7 @@ export default function Index() {
             recordingInProgress={recordingInProgress}
             latestDecibel={latestDecibel}
             maxMs={MAX_MS}
+            waveformBufferRef={waveformBufferRef}
           />
         </View>
         <View
@@ -146,8 +151,6 @@ export default function Index() {
           onStop={() => stopRecording()}
         />
       </View>
-      {/* <Button title="再生" onPress={play} disabled={!audioUri || recordingInProgress} /> */}
-      {/* <Button title="リセット" onPress={() => setAudioUri(null)} /> */}
       <View
         style={{
           flex: 1,

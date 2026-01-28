@@ -5,16 +5,19 @@ export default function WaveformDisplay({
   recordingInProgress,
   latestDecibel,
   maxMs,
+  waveformBufferRef,
 }: {
   recordingInProgress: boolean;
   latestDecibel: React.RefObject<number | null>;
   maxMs: number;
+  waveformBufferRef: React.RefObject<number[]>;
 }) {
   const [waveformHeights, setWaveformHeights] = useState<number[]>([]);
   const [containerWidth, setContainerWidth] = useState(0);
   const barGap = 1;
   const borderWidth = 1;
   const sampleIntervalMs = 200;
+  const displayScale = 60;
   const targetBars = Math.ceil(maxMs / sampleIntervalMs);
 
   //波形バー、隙間の幅を調整
@@ -34,21 +37,22 @@ export default function WaveformDisplay({
     if (!recordingInProgress) return;
     setWaveformHeights([]);
 
-    let waveformBuffer: number[] = [];
     const interval = setInterval(() => {
       if (latestDecibel.current != null) {
         const normalized = Math.max(0, Math.min(1, (latestDecibel.current + 60) / 60));
-        const height = normalized * 60;
+        const shaped = Math.pow(normalized, 1.4);
+        const normalizedRounded = Math.round(shaped * 100) / 100;
+        const displayHeight = Math.round(normalizedRounded * displayScale * 100) / 100;
 
-        waveformBuffer.push(height);
-        if (waveformBuffer.length <= targetBars) {
-          setWaveformHeights([...waveformBuffer]);
+        waveformBufferRef.current.push(normalizedRounded);
+        if (waveformBufferRef.current.length <= targetBars) {
+          setWaveformHeights((prev) => [...prev, displayHeight]);
         }
       }
     }, sampleIntervalMs);
 
     return () => clearInterval(interval);
-  }, [recordingInProgress, latestDecibel, targetBars]);
+  }, [recordingInProgress, latestDecibel, targetBars, waveformBufferRef]);
 
   return (
     <View
