@@ -22,6 +22,7 @@ export default function Index() {
     durationMs,
     location,
     resetRecording,
+    MAX_MS
   } = useAudioRecorderHook();
 
   const [memo, setMemo] = useState("");
@@ -104,6 +105,7 @@ export default function Index() {
           onRetry={handleRetry}
         />
       </KeyboardAvoidingView>
+
       <LevelLineDisplay recordingInProgress={recordingInProgress} latestDecibel={latestDecibel} />
 
       <View style={{ flex: 2 }}>
@@ -111,6 +113,7 @@ export default function Index() {
           <WaveformDisplay
             recordingInProgress={recordingInProgress}
             latestDecibel={latestDecibel}
+            maxMs={MAX_MS}
           />
         </View>
         <View

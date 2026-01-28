@@ -1,6 +1,12 @@
 import React, { useEffect } from "react";
 import { View, StyleSheet } from "react-native";
-import { Easing, useSharedValue, withRepeat, withTiming } from "react-native-reanimated";
+import {
+  Easing,
+  useSharedValue,
+  withRepeat,
+  withTiming,
+  configureReanimatedLogger,
+} from "react-native-reanimated";
 import { Canvas, Path, usePathValue } from "@shopify/react-native-skia";
 import type { SkPath } from "@shopify/react-native-skia";
 
@@ -110,4 +116,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+});
+
+configureReanimatedLogger({
+  strict: false,
 });

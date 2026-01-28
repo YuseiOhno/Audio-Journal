@@ -18,7 +18,7 @@ export default function Index() {
   } | null>(null);
 
   const recorder = useAudioRecorder({ ...RecordingPresets.HIGH_QUALITY, isMeteringEnabled: true });
-  const recorderState = useAudioRecorderState(recorder, 100);
+  const recorderState = useAudioRecorderState(recorder, 200);
   const latestDecibel = useRef<number | null>(null);
   const { fetchLocationOnce } = useFetchLocationOnce();
 
@@ -99,5 +99,6 @@ export default function Index() {
     dateKey,
     durationMs,
     resetRecording,
+    MAX_MS,
   };
 }
