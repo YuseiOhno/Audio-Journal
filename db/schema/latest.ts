@@ -1,5 +1,5 @@
 //migrateの度に更新
-export const LATEST_VERSION = 2;
+export const LATEST_VERSION = 3;
 
 export const LATEST_SCHEMA_SQL = `
     CREATE TABLE IF NOT EXISTS recordings (
@@ -11,7 +11,10 @@ export const LATEST_SCHEMA_SQL = `
         lat REAL,
         lng REAL,
         accuracy REAL,
-        memo TEXT
+        memo TEXT,
+        waveform_sample_interval_ms INTEGER,
+        waveform_blob BLOB,
+        waveform_length INTEGER
     );
 
     PRAGMA user_version = ${LATEST_VERSION};

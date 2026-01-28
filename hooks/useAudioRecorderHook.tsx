@@ -5,6 +5,7 @@ import { useSmoothCountdown } from "@/hooks/useSmoothCountdown";
 import useFetchLocationOnce from "@/hooks/useFetchLocationOnce";
 
 const MAX_MS = 30000;
+const sampleIntervalMs = 200;
 
 export default function Index() {
   const [audioUri, setAudioUri] = useState<string | null>(null);
@@ -18,7 +19,7 @@ export default function Index() {
   } | null>(null);
 
   const recorder = useAudioRecorder({ ...RecordingPresets.HIGH_QUALITY, isMeteringEnabled: true });
-  const recorderState = useAudioRecorderState(recorder, 200);
+  const recorderState = useAudioRecorderState(recorder, sampleIntervalMs);
   const latestDecibel = useRef<number | null>(null);
   const { fetchLocationOnce } = useFetchLocationOnce();
 
@@ -100,5 +101,6 @@ export default function Index() {
     durationMs,
     resetRecording,
     MAX_MS,
+    sampleIntervalMs,
   };
 }

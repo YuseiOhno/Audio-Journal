@@ -5,18 +5,19 @@ export default function WaveformDisplay({
   recordingInProgress,
   latestDecibel,
   maxMs,
+  sampleIntervalMs,
   waveformBufferRef,
 }: {
   recordingInProgress: boolean;
   latestDecibel: React.RefObject<number | null>;
   maxMs: number;
+  sampleIntervalMs: number;
   waveformBufferRef: React.RefObject<number[]>;
 }) {
   const [waveformHeights, setWaveformHeights] = useState<number[]>([]);
   const [containerWidth, setContainerWidth] = useState(0);
   const barGap = 1;
   const borderWidth = 1;
-  const sampleIntervalMs = 200;
   const displayScale = 60;
   const targetBars = Math.ceil(maxMs / sampleIntervalMs);
 
@@ -52,7 +53,7 @@ export default function WaveformDisplay({
     }, sampleIntervalMs);
 
     return () => clearInterval(interval);
-  }, [recordingInProgress, latestDecibel, targetBars, waveformBufferRef]);
+  }, [recordingInProgress, latestDecibel, targetBars, waveformBufferRef, sampleIntervalMs]);
 
   return (
     <View

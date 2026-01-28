@@ -7,7 +7,7 @@ import WaveformDisplay from "@/components/WaveformDisplay";
 import LevelLineDisplay from "@/components/LevelLineDisplay";
 import useAudioRecorderHook from "@/hooks/useAudioRecorderHook";
 import { MemoModal } from "@/components/MemoModal";
-import { insertRecording } from "@/db/repositories/recordings";
+import { insertRecording, readRecordings } from "@/db/repositories/recordings";
 
 export default function Index() {
   const {
@@ -23,6 +23,7 @@ export default function Index() {
     location,
     resetRecording,
     MAX_MS,
+    sampleIntervalMs,
   } = useAudioRecorderHook();
 
   const [memo, setMemo] = useState("");
@@ -62,7 +63,6 @@ export default function Index() {
       setMemo("");
       setMemoVisible(true);
       lastAudioUriRef.current = audioUri;
-      console.log(waveformBufferRef.current);
     }
   }, [audioUri]);
 
@@ -79,7 +79,10 @@ export default function Index() {
         lng: location?.lng ?? null,
         accuracy: location?.accuracy ?? null,
         memo: memo.trim() || null,
+        waveform: waveformBufferRef.current,
+        waveformSampleIntervalMs: sampleIntervalMs,
       });
+      readRecordings(); //test
       setMemoVisible(false);
       setMemo("");
       resetRecording();
@@ -118,6 +121,7 @@ export default function Index() {
             recordingInProgress={recordingInProgress}
             latestDecibel={latestDecibel}
             maxMs={MAX_MS}
+            sampleIntervalMs={sampleIntervalMs}
             waveformBufferRef={waveformBufferRef}
           />
         </View>

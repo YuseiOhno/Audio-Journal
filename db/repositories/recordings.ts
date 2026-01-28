@@ -1,4 +1,5 @@
 import { db } from "@/db";
+import { toWaveformBlob } from "@/utils/waveformBlob";
 
 type RecordingInsert = {
   dateKey: string;
@@ -9,9 +10,13 @@ type RecordingInsert = {
   lng: number | null;
   accuracy: number | null;
   memo: string | null;
+  waveform: number[];
+  waveformSampleIntervalMs: number;
 };
 
 export async function insertRecording(data: RecordingInsert) {
+  const waveformBlob = toWaveformBlob(data.waveform);
+
   await db.runAsync(
     `
     INSERT INTO recordings (
@@ -22,8 +27,11 @@ export async function insertRecording(data: RecordingInsert) {
       lat,
       lng,
       accuracy,
-      memo
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      memo,
+      waveform_blob,
+      waveform_length,
+      waveform_sample_interval_ms
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `,
     [
       data.dateKey,
@@ -34,6 +42,9 @@ export async function insertRecording(data: RecordingInsert) {
       data.lng,
       data.accuracy,
       data.memo,
+      waveformBlob,
+      data.waveform.length,
+      data.waveformSampleIntervalMs,
     ]
   );
 }
