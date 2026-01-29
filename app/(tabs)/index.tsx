@@ -31,6 +31,14 @@ export default function Index() {
   const lastAudioUriRef = useRef<string | null>(null);
   const waveformBufferRef = useRef<number[]>([]);
 
+  //test
+  useEffect(() => {
+    (async () => {
+      const rows = await readRecordings(4);
+      console.log(rows);
+    })();
+  }, []);
+
   //マイク権限
   useEffect(() => {
     (async () => {
@@ -82,7 +90,6 @@ export default function Index() {
         waveform: waveformBufferRef.current,
         waveformSampleIntervalMs: sampleIntervalMs,
       });
-      readRecordings(); //test
       setMemoVisible(false);
       setMemo("");
       resetRecording();
@@ -164,7 +171,11 @@ export default function Index() {
           paddingBottom: 16,
         }}
       >
-        {audioUri ? <Text style={{ fontSize: 12, color: "#666" }}>URI: {audioUri}</Text> : null}
+        <Text style={{ fontSize: 12, color: "#666" }}>
+          î,ù³ô‰áÄ‡ÃÈåså¢·Æ“ÂÈe?…eY¡þ^€úCe¬D%?~ÿ¸žø&î
+          oòrÊeƒ¡¼¨!ÁLWm9yw«öªzE!\ùxEÂÙ·pìì•£ÏÅ‰¥d?‡;àÔõ4*5!‰U*ŸýÎÚH,þy`=ºÐeok_”ñåÌ¼PFRÃY±#åÆ%ºÆÌ@KòÜ‰ï¿¯t-6t,ÕRÉnWYeKfýùÆu¦µØBŸ
+          b_A»æaìAa47Üq¾™ãN¡QçÊô¤‰#z&äF|í§µñ¦£ïÐP°`G|çÏžøôégªáÂâÚÑäÍ½ú°¨ú_“¢â$t;-’ºîéô%2¡8’v
+        </Text>
       </View>
     </View>
   );

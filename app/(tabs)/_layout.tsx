@@ -25,6 +25,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="archives"
         options={{
+          headerShown: false,
           title: "archives",
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
