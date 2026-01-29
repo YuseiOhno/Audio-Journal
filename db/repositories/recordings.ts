@@ -49,20 +49,16 @@ export async function insertRecording(data: RecordingInsert) {
   );
 }
 
-export async function readRecordings(id: number) {
-  const row: any = await db.getFirstAsync(
-    "SELECT id, audio_uri, waveform_blob, waveform_length, waveform_sample_interval_ms,created_at FROM recordings WHERE id = ?",
-    [id],
-  );
+export async function readRecordings() {
+  const rows: any = await db.getAllAsync("SELECT id, audio_uri, created_at FROM recordings");
 
-  // return rows.map((row: any) => ({
+  return rows.map((row: any) => ({
+    ...row,
+  }));
+  // if (!row) return null;
+
+  // return {
   //   ...row,
   //   waveform: row.waveform_blob ? fromWaveformBlob(row.waveform_blob) : [],
-  // }));
-  if (!row) return null;
-
-  return {
-    ...row,
-    waveform: row.waveform_blob ? fromWaveformBlob(row.waveform_blob) : [],
-  };
+  // };
 }

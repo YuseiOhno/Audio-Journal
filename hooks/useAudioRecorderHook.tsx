@@ -3,6 +3,7 @@ import { useAudioRecorder, RecordingPresets, useAudioRecorderState } from "expo-
 import { useState, useEffect, useRef } from "react";
 import { useSmoothCountdown } from "@/hooks/useSmoothCountdown";
 import useFetchLocationOnce from "@/hooks/useFetchLocationOnce";
+import { moveRecordingToDocuments } from "@/utils/moveRecordingToDocuments";
 
 const MAX_MS = 30000;
 const sampleIntervalMs = 200;
@@ -27,7 +28,7 @@ export default function Index() {
   const { remainingSecondsText } = useSmoothCountdown(
     recorderState.durationMillis,
     MAX_MS,
-    recorderState.isRecording
+    recorderState.isRecording,
   );
 
   //最新のdb値を参照、30秒で自動停止
@@ -73,7 +74,8 @@ export default function Index() {
         Alert.alert("録音データが取得できませんでした");
         return;
       }
-      setAudioUri(uri);
+      const newUri = await moveRecordingToDocuments(uri);
+      setAudioUri(newUri);
       setDurationMs(recorderState.durationMillis ?? 0);
     } catch (e: any) {
       Alert.alert("録音停止に失敗しました", String(e?.message ?? e));

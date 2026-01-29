@@ -34,10 +34,10 @@ export default function Index() {
   //test
   useEffect(() => {
     (async () => {
-      const rows = await readRecordings(4);
+      const rows = await readRecordings();
       console.log(rows);
     })();
-  }, []);
+  }, [audioUri]);
 
   //マイク権限
   useEffect(() => {
@@ -172,9 +172,7 @@ export default function Index() {
         }}
       >
         <Text style={{ fontSize: 12, color: "#666" }}>
-          î,ù³ô‰áÄ‡ÃÈåså¢·Æ“ÂÈe?…eY¡þ^€úCe¬D%?~ÿ¸žø&î
-          oòrÊeƒ¡¼¨!ÁLWm9yw«öªzE!\ùxEÂÙ·pìì•£ÏÅ‰¥d?‡;àÔõ4*5!‰U*ŸýÎÚH,þy`=ºÐeok_”ñåÌ¼PFRÃY±#åÆ%ºÆÌ@KòÜ‰ï¿¯t-6t,ÕRÉnWYeKfýùÆu¦µØBŸ
-          b_A»æaìAa47Üq¾™ãN¡QçÊô¤‰#z&äF|í§µñ¦£ïÐP°`G|çÏžøôégªáÂâÚÑäÍ½ú°¨ú_“¢â$t;-’ºîéô%2¡8’v
+          file:///Users/ohnoyusei/Library/Developer/CoreSimulator/Devices/FE0430B0-F577-4B95-ADC3-828BC0BC6E02/data/Containers/Data/Application/6A6AF0EF-5D14-4D91-BBD0-C4878C8E310F/Library/Caches/ExponentExperienceData/@yuseiohno/musann/ExpoAudio/recording-5DEDA14F-6144-4A24-9AC3-A2BAE123407B.m4a
         </Text>
       </View>
     </View>
