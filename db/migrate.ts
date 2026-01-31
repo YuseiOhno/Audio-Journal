@@ -2,9 +2,10 @@ import { LATEST_SCHEMA_SQL } from "./schema/latest";
 import * as m001 from "./migrations/001_init";
 import * as m002 from "./migrations/002_add_recording_meta";
 import * as m003 from "./migrations/003_add_waveform_blob";
+import * as m004 from "./migrations/004_add_recording_title";
 
 //migrationsファイルが増えるごとに下記配列追加
-const MIGRATIONS = [m001, m002, m003];
+const MIGRATIONS = [m001, m002, m003, m004];
 
 export async function migrate(db: any) {
   const row = await db.getFirstAsync("PRAGMA user_version");

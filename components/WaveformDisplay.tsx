@@ -24,7 +24,10 @@ export default function WaveformDisplay({
   //波形バー、隙間の幅を調整
   const { fitBarWidth, fitGap } = useMemo(() => {
     if (containerWidth <= 0) return { fitBarWidth: 1, fitGap: 0 };
-    const innerWidth = Math.max(0, containerWidth - borderWidth * 2);
+    const innerWidth = Math.max(
+      0,
+      containerWidth - borderWidth * 2 - styles.container.paddingHorizontal * 2,
+    );
     let gap = barGap;
     let width = (innerWidth - gap * (targetBars - 1)) / targetBars;
     if (width <= 0) {

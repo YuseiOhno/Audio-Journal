@@ -5,30 +5,49 @@ type Props = {
   visible: boolean;
   memo: string;
   onChangeMemo: (text: string) => void;
+  recTitle: string;
+  onChnageRecTitle: (text: string) => void;
   onSave: () => void;
   onRetry: () => void;
 };
 
-export function MemoModal({ visible, memo, onChangeMemo, onSave, onRetry }: Props) {
+export function MemoModal({
+  visible,
+  memo,
+  onChangeMemo,
+  recTitle,
+  onChnageRecTitle,
+  onSave,
+  onRetry,
+}: Props) {
   return (
     <Modal visible={visible} transparent animationType="fade">
       <View style={styles.backdrop}>
         <View style={styles.card}>
-          <Text style={styles.title}>メモを入力</Text>
+          <Text style={styles.title}>Recording Description</Text>
+          <TextInput
+            value={recTitle}
+            onChangeText={onChnageRecTitle}
+            placeholder="Title"
+            placeholderTextColor="#888888"
+            style={styles.recTitleInput}
+            maxLength={15}
+          />
           <TextInput
             value={memo}
             onChangeText={onChangeMemo}
-            placeholder="メモ"
+            placeholder="Memo"
             placeholderTextColor="#888888"
-            style={styles.input}
+            style={styles.memoInput}
             multiline
+            maxLength={150}
           />
           <View style={styles.actions}>
             <Pressable onPress={onRetry} style={[styles.button, styles.secondary]}>
-              <Text style={styles.secondaryText}>録り直す</Text>
+              <Text style={styles.secondaryText}>Cancel</Text>
             </Pressable>
             <Pressable onPress={onSave} style={[styles.button, styles.primary]}>
-              <Text style={styles.primaryText}>保存</Text>
+              <Text style={styles.primaryText}>Save</Text>
             </Pressable>
           </View>
         </View>
@@ -58,11 +77,20 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#333333",
   },
-  input: {
+  recTitleInput: {
+    borderWidth: 1,
+    borderRadius: 10,
+    borderColor: "#CCCCCC",
+    backgroundColor: "#FFFFFF",
+    color: "#333333",
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
+  memoInput: {
     minHeight: 90,
     borderWidth: 1,
     borderColor: "#CCCCCC",
-    borderRadius: 12,
+    borderRadius: 10,
     paddingHorizontal: 12,
     paddingVertical: 10,
     color: "#333333",

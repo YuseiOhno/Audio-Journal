@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { toWaveformBlob, fromWaveformBlob } from "@/utils/waveformBlob";
+import { toWaveformBlob } from "@/utils/waveformBlob";
 
 type RecordingInsert = {
   dateKey: string;
@@ -12,6 +12,7 @@ type RecordingInsert = {
   memo: string | null;
   waveform: number[];
   waveformSampleIntervalMs: number;
+  recording_title: string | null;
 };
 
 export async function insertRecording(data: RecordingInsert) {
@@ -30,8 +31,9 @@ export async function insertRecording(data: RecordingInsert) {
       memo,
       waveform_blob,
       waveform_length,
-      waveform_sample_interval_ms
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      waveform_sample_interval_ms,
+      recording_title
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)
     `,
     [
       data.dateKey,
@@ -45,20 +47,17 @@ export async function insertRecording(data: RecordingInsert) {
       waveformBlob,
       data.waveform.length,
       data.waveformSampleIntervalMs,
+      data.recording_title,
     ],
   );
 }
 
 export async function readRecordings() {
-  const rows: any = await db.getAllAsync("SELECT id, audio_uri, created_at FROM recordings");
+  const rows: any = await db.getAllAsync(
+    "SELECT id, date_key, created_at, duration_ms, lat, lng, accuracy, audio_uri, recording_title,memo FROM recordings",
+  );
 
   return rows.map((row: any) => ({
     ...row,
   }));
-  // if (!row) return null;
-
-  // return {
-  //   ...row,
-  //   waveform: row.waveform_blob ? fromWaveformBlob(row.waveform_blob) : [],
-  // };
 }

@@ -2,11 +2,14 @@ import { Alert, Text, View, KeyboardAvoidingView } from "react-native";
 import { AudioModule, setAudioModeAsync } from "expo-audio";
 import * as Location from "expo-location";
 import { useEffect, useRef, useState } from "react";
+
 import { RecordButton } from "@/components/RecordButton";
 import WaveformDisplay from "@/components/WaveformDisplay";
 import LevelLineDisplay from "@/components/LevelLineDisplay";
-import useAudioRecorderHook from "@/hooks/useAudioRecorderHook";
 import { MemoModal } from "@/components/MemoModal";
+
+import useAudioRecorderHook from "@/hooks/useAudioRecorderHook";
+
 import { insertRecording, readRecordings } from "@/db/repositories/recordings";
 
 export default function Index() {
@@ -27,6 +30,7 @@ export default function Index() {
   } = useAudioRecorderHook();
 
   const [memo, setMemo] = useState("");
+  const [recTitle, setRecTitle] = useState("");
   const [memoVisible, setMemoVisible] = useState(false);
   const lastAudioUriRef = useRef<string | null>(null);
   const waveformBufferRef = useRef<number[]>([]);
@@ -69,6 +73,7 @@ export default function Index() {
   useEffect(() => {
     if (audioUri && audioUri !== lastAudioUriRef.current) {
       setMemo("");
+      setRecTitle("");
       setMemoVisible(true);
       lastAudioUriRef.current = audioUri;
     }
@@ -89,9 +94,9 @@ export default function Index() {
         memo: memo.trim() || null,
         waveform: waveformBufferRef.current,
         waveformSampleIntervalMs: sampleIntervalMs,
+        recording_title: recTitle,
       });
       setMemoVisible(false);
-      setMemo("");
       resetRecording();
       waveformBufferRef.current = [];
       lastAudioUriRef.current = null;
@@ -115,6 +120,8 @@ export default function Index() {
           visible={memoVisible}
           memo={memo}
           onChangeMemo={setMemo}
+          recTitle={recTitle}
+          onChnageRecTitle={setRecTitle}
           onSave={handleSaveDB}
           onRetry={handleRetry}
         />
