@@ -82,6 +82,8 @@ export default function Index() {
   //モーダル：保存
   const handleSaveDB = async () => {
     if (!audioUri || !createdAt || !dateKey) return;
+    const memoValue = memo.trim() === "" ? "N/A" : memo;
+    const titleValue = recTitle.trim() === "" ? "Untitled" : recTitle;
     try {
       await insertRecording({
         dateKey,
@@ -91,10 +93,10 @@ export default function Index() {
         lat: location?.lat ?? null,
         lng: location?.lng ?? null,
         accuracy: location?.accuracy ?? null,
-        memo: memo.trim() || null,
+        memo: memoValue,
         waveform: waveformBufferRef.current,
         waveformSampleIntervalMs: sampleIntervalMs,
-        recording_title: recTitle,
+        recording_title: titleValue,
       });
       setMemoVisible(false);
       resetRecording();

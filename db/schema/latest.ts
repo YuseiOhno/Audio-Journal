@@ -11,11 +11,11 @@ export const LATEST_SCHEMA_SQL = `
         lat REAL,
         lng REAL,
         accuracy REAL,
-        memo TEXT DEFAULT "N/A",
+        memo TEXT,
         waveform_sample_interval_ms INTEGER,
         waveform_blob BLOB,
         waveform_length INTEGER,
-        recording_title TEXT DEFAULT "Untitled"
+        recording_title TEXT
     );
 
     PRAGMA user_version = ${LATEST_VERSION};

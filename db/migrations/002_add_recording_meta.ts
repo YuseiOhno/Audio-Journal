@@ -6,7 +6,7 @@ export async function migrate(db: any): Promise<void> {
     ALTER TABLE recordings ADD COLUMN lat REAL;
     ALTER TABLE recordings ADD COLUMN lng REAL;
     ALTER TABLE recordings ADD COLUMN accuracy REAL;
-    ALTER TABLE recordings ADD COLUMN memo TEXT DEFAULT "N/A";
+    ALTER TABLE recordings ADD COLUMN memo TEXT;
 
     PRAGMA user_version = ${VERSION};
   `);
