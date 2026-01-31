@@ -3,16 +3,17 @@ import { View, TextInput, TouchableOpacity, StyleSheet, Text, FlatList } from "r
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { readRecordings } from "@/db/repositories/recordings";
-import { splitDateKey } from "@/utils/dateKey";
+import { splitDateKey, formatSeconds, formatCreatedAtLocal } from "@/utils/format";
 
 type RecordingRow = {
   id: number;
   date_key: string;
   created_at: string;
-  duration_ms: number | null;
+  duration_ms: number;
   lat: number | null;
   lng: number | null;
   accuracy: number | null;
+  recording_title: string | null;
 };
 
 export default function Archives() {
@@ -90,11 +91,10 @@ export default function Archives() {
               </View>
               <View style={styles.rowRight}>
                 <View style={styles.rowHeader}>
-                  <Text style={styles.rowTitle}>#{item.id}</Text>
-                  <Text style={styles.rowDate}>{item.date_key}</Text>
+                  <Text style={styles.rowTitle}>{item.recording_title}</Text>
+                  <Text style={styles.rowDuration}>{formatSeconds(item.duration_ms)}s</Text>
                 </View>
-                <Text style={styles.rowMeta}>created_at: {item.created_at}</Text>
-                <Text style={styles.rowMeta}>duration_ms: {item.duration_ms ?? "null"}</Text>
+                <Text style={styles.rowMeta}>{formatCreatedAtLocal(item.created_at)}</Text>
                 <Text style={styles.rowMeta}>
                   {item.lat == null || item.lng == null
                     ? "null"
@@ -194,7 +194,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#222222",
   },
-  rowDate: {
+  rowDuration: {
     fontSize: 13,
     color: "#555555",
   },

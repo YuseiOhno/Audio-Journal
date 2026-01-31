@@ -54,7 +54,7 @@ export async function insertRecording(data: RecordingInsert) {
 
 export async function readRecordings() {
   const rows: any = await db.getAllAsync(
-    "SELECT id, date_key, created_at, duration_ms, lat, lng, accuracy, audio_uri, recording_title,memo FROM recordings",
+    "SELECT id, date_key, created_at, duration_ms, lat, lng, accuracy, recording_title FROM recordings",
   );
 
   return rows.map((row: any) => ({
