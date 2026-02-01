@@ -15,6 +15,7 @@ import BottomSheet, { BottomSheetView, BottomSheetBackdrop } from "@gorhom/botto
 import Ionicons from "@expo/vector-icons/Ionicons";
 
 import { getRecordingRecordById, getRecordings } from "@/db/repositories/recordings";
+import StaticWaveform from "@/components/StaticWaveform";
 import { splitDateKey, formatSeconds, formatCreatedAtLocal } from "@/utils/format";
 
 type RecordingRow = {
@@ -27,7 +28,7 @@ type RecordingRow = {
   lng: number | null;
   accuracy: number | null;
   memo: string | null;
-  waveform_blob: number[];
+  waveform_blob: number[] | null;
   waveform_length: number;
   waveform_sample_interval_ms: number;
   recording_title: string | null;
@@ -153,6 +154,11 @@ export default function Archives() {
           <BottomSheetView style={styles.bsViewContainer}>
             <Text style={styles.bsTitle}>{selected?.recording_title ?? "Untitled"}</Text>
             <Text style={styles.bsMeta}>{selected?.audio_uri ?? ""}</Text>
+            <StaticWaveform
+              waveform={selected?.waveform_blob}
+              waveformLength={selected?.waveform_length}
+              waveformSampleIntervalMs={selected?.waveform_sample_interval_ms}
+            />
           </BottomSheetView>
         </BottomSheet>
       </GestureHandlerRootView>
