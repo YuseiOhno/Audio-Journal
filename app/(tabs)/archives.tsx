@@ -14,17 +14,22 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import BottomSheet, { BottomSheetView, BottomSheetBackdrop } from "@gorhom/bottom-sheet";
 import Ionicons from "@expo/vector-icons/Ionicons";
 
-import { readRecordings } from "@/db/repositories/recordings";
+import { getRecordingRecordById, getRecordings } from "@/db/repositories/recordings";
 import { splitDateKey, formatSeconds, formatCreatedAtLocal } from "@/utils/format";
 
 type RecordingRow = {
   id: number;
   date_key: string;
   created_at: string;
+  audio_uri: string;
   duration_ms: number;
   lat: number | null;
   lng: number | null;
   accuracy: number | null;
+  memo: string | null;
+  waveform_blob: number[];
+  waveform_length: number;
+  waveform_sample_interval_ms: number;
   recording_title: string | null;
 };
 
@@ -41,7 +46,7 @@ export default function Archives() {
 
   useEffect(() => {
     (async () => {
-      const result = await readRecordings();
+      const result = await getRecordings();
       setRows(result);
     })();
   }, []);
@@ -101,8 +106,9 @@ export default function Archives() {
           return (
             <Pressable
               style={styles.rowCard}
-              onPress={() => {
-                setSelected(item);
+              onPress={async () => {
+                const record = await getRecordingRecordById(item.id);
+                setSelected(record);
                 bottomSheetRef.current?.snapToIndex(1);
               }}
             >
@@ -146,7 +152,7 @@ export default function Archives() {
         >
           <BottomSheetView style={styles.bsViewContainer}>
             <Text style={styles.bsTitle}>{selected?.recording_title ?? "Untitled"}</Text>
-            <Text style={styles.bsMeta}>{selected?.created_at ?? ""}</Text>
+            <Text style={styles.bsMeta}>{selected?.audio_uri ?? ""}</Text>
           </BottomSheetView>
         </BottomSheet>
       </GestureHandlerRootView>

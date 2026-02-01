@@ -10,7 +10,7 @@ import { MemoModal } from "@/components/MemoModal";
 
 import useAudioRecorderHook from "@/hooks/useAudioRecorderHook";
 
-import { insertRecording, readRecordings } from "@/db/repositories/recordings";
+import { insertRecording, getTest } from "@/db/repositories/recordings";
 
 export default function Index() {
   const {
@@ -38,7 +38,7 @@ export default function Index() {
   //test
   useEffect(() => {
     (async () => {
-      const rows = await readRecordings();
+      const rows = await getTest();
       console.log(rows);
     })();
   }, [audioUri]);
