@@ -42,5 +42,5 @@ export function formatCreatedAtLocal(iso: string) {
   const day = pad(date.getDate());
   const hour = pad(date.getHours());
   const minute = pad(date.getMinutes());
-  return `${year}${month}${day} ${hour}:${minute}`;
+  return `${year}/${month}/${day} ${hour}:${minute}`;
 }

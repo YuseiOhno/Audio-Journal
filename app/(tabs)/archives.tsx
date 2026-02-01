@@ -1,7 +1,19 @@
-import { useEffect, useMemo, useState } from "react";
-import { View, TextInput, TouchableOpacity, StyleSheet, Text, FlatList } from "react-native";
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  View,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Text,
+  FlatList,
+  Pressable,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+
+import BottomSheet, { BottomSheetView, BottomSheetBackdrop } from "@gorhom/bottom-sheet";
 import Ionicons from "@expo/vector-icons/Ionicons";
+
 import { readRecordings } from "@/db/repositories/recordings";
 import { splitDateKey, formatSeconds, formatCreatedAtLocal } from "@/utils/format";
 
@@ -19,7 +31,10 @@ type RecordingRow = {
 export default function Archives() {
   const [query, setQuery] = useState("");
   const [rows, setRows] = useState<RecordingRow[]>([]);
+  const [selected, setSelected] = useState<RecordingRow>();
+  const bottomSheetRef = useRef<BottomSheet>(null);
   const { top } = useSafeAreaInsets();
+  const snapPoints = useMemo(() => ["25%", "80%"], []);
 
   const searchBarHeight = 38;
   const searchBarMargin = 20;
@@ -84,32 +99,57 @@ export default function Archives() {
         renderItem={({ item }) => {
           const { year, monthDay } = getDateParts(item.date_key);
           return (
-            <View style={styles.rowCard}>
+            <Pressable
+              style={styles.rowCard}
+              onPress={() => {
+                setSelected(item);
+                bottomSheetRef.current?.snapToIndex(1);
+              }}
+            >
               <View style={styles.rowLeft}>
                 <Text style={styles.rowYear}>{year}</Text>
                 <Text style={styles.rowMonthDay}>{monthDay}</Text>
               </View>
               <View style={styles.rowRight}>
                 <View style={styles.rowHeader}>
-                  <Text style={styles.rowTitle}>{item.recording_title}</Text>
+                  <Text style={styles.rowTitle} numberOfLines={1} ellipsizeMode="tail">
+                    {item.recording_title}
+                  </Text>
                   <Text style={styles.rowDuration}>{formatSeconds(item.duration_ms)}s</Text>
                 </View>
                 <Text style={styles.rowMeta}>{formatCreatedAtLocal(item.created_at)}</Text>
                 <Text style={styles.rowMeta}>
                   {item.lat == null || item.lng == null
                     ? "null"
-                    : `${item.lat}, ${item.lng} (±${item.accuracy ?? "?"} m)`}
+                    : `${item.lat.toFixed(6)}, ${item.lng.toFixed(6)} (±${item.accuracy === null ? "?" : Math.floor(item.accuracy)} m)`}
                 </Text>
               </View>
-            </View>
+            </Pressable>
           );
         }}
         ListEmptyComponent={
           <View style={styles.emptyState}>
-            <Text style={styles.emptyText}>記録がありません</Text>
+            <Text style={styles.emptyText}>no record</Text>
           </View>
         }
       />
+      <GestureHandlerRootView style={styles.bottomSheetContainer} pointerEvents="box-none">
+        <BottomSheet
+          ref={bottomSheetRef}
+          index={-1}
+          snapPoints={snapPoints}
+          enablePanDownToClose
+          backgroundStyle={styles.bottomSheetBackground}
+          backdropComponent={(props) => (
+            <BottomSheetBackdrop {...props} pressBehavior="close" opacity={0.3} />
+          )}
+        >
+          <BottomSheetView style={styles.bsViewContainer}>
+            <Text style={styles.bsTitle}>{selected?.recording_title ?? "Untitled"}</Text>
+            <Text style={styles.bsMeta}>{selected?.created_at ?? ""}</Text>
+          </BottomSheetView>
+        </BottomSheet>
+      </GestureHandlerRootView>
     </View>
   );
 }
@@ -118,6 +158,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#B5B6B6",
+    position: "relative",
   },
   searchBarWrap: {
     position: "absolute",
@@ -183,20 +224,26 @@ const styles = StyleSheet.create({
   rowRight: {
     flex: 1,
     gap: 6,
+    minWidth: 0,
   },
   rowHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    gap: 8,
+    width: "100%",
   },
   rowTitle: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "600",
     color: "#222222",
+    flex: 1,
+    flexShrink: 1,
   },
   rowDuration: {
     fontSize: 13,
     color: "#555555",
+    flexShrink: 0,
   },
   rowMeta: {
     fontSize: 13,
@@ -209,5 +256,30 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 14,
     color: "#666666",
+  },
+  bottomSheetContainer: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+  },
+  bottomSheetBackground: {
+    backgroundColor: "#B5B6B6",
+  },
+  bsViewContainer: {
+    flex: 1,
+    padding: 36,
+    alignItems: "center",
+  },
+  bsTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#222222",
+  },
+  bsMeta: {
+    marginTop: 8,
+    fontSize: 14,
+    color: "#555555",
   },
 });

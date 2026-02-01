@@ -31,7 +31,7 @@ export function MemoModal({
             placeholder="Title"
             placeholderTextColor="#888888"
             style={styles.recTitleInput}
-            maxLength={10}
+            maxLength={20}
           />
           <TextInput
             value={memo}
