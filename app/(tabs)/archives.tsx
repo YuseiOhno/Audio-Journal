@@ -16,6 +16,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 
 import { getRecordingRecordById, getRecordings } from "@/db/repositories/recordings";
 import StaticWaveform from "@/components/StaticWaveform";
+import AudioPlayer from "@/components/AudioPlayer";
 import { splitDateKey, formatSeconds, formatCreatedAtLocal } from "@/utils/format";
 
 type RecordingRow = {
@@ -40,7 +41,7 @@ export default function Archives() {
   const [selected, setSelected] = useState<RecordingRow>();
   const bottomSheetRef = useRef<BottomSheet>(null);
   const { top } = useSafeAreaInsets();
-  const snapPoints = useMemo(() => ["25%", "80%"], []);
+  const snapPoints = useMemo(() => ["25%", "90%"], []);
 
   const searchBarHeight = 38;
   const searchBarMargin = 20;
@@ -159,6 +160,7 @@ export default function Archives() {
               waveformLength={selected?.waveform_length}
               waveformSampleIntervalMs={selected?.waveform_sample_interval_ms}
             />
+            <AudioPlayer />
           </BottomSheetView>
         </BottomSheet>
       </GestureHandlerRootView>
@@ -275,6 +277,7 @@ const styles = StyleSheet.create({
     right: 0,
     top: 0,
     bottom: 0,
+    zIndex: 20,
   },
   bottomSheetBackground: {
     backgroundColor: "#B5B6B6",

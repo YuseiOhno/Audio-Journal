@@ -1,6 +1,8 @@
 import { Stack } from "expo-router";
 import { useState, useEffect } from "react";
+import { TamaguiProvider } from "@tamagui/core";
 import { initDB } from "@/db";
+import { config } from "@/tamagui.config";
 
 export default function RootLayout() {
   const [ready, setReady] = useState(false);
@@ -16,13 +18,15 @@ export default function RootLayout() {
     return null; // ← SplashScreenを使ってもOK
   }
   return (
-    <Stack>
-      <Stack.Screen
-        name="(tabs)"
-        options={{
-          headerShown: false,
-        }}
-      />
-    </Stack>
+    <TamaguiProvider config={config} defaultTheme="light">
+      <Stack>
+        <Stack.Screen
+          name="(tabs)"
+          options={{
+            headerShown: false,
+          }}
+        />
+      </Stack>
+    </TamaguiProvider>
   );
 }
