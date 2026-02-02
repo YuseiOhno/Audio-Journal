@@ -1,14 +1,21 @@
 import { Alert } from "react-native";
-import { useAudioRecorder, RecordingPresets, useAudioRecorderState } from "expo-audio";
+import { moveRecordingToDocuments } from "@/utils/moveRecordingToDocuments";
+import {
+  useAudioRecorder,
+  RecordingPresets,
+  useAudioRecorderState,
+  setAudioModeAsync,
+  IOSOutputFormat,
+  AudioQuality,
+} from "expo-audio";
 import { useState, useEffect, useRef } from "react";
 import { useSmoothCountdown } from "@/hooks/useSmoothCountdown";
 import useFetchLocationOnce from "@/hooks/useFetchLocationOnce";
-import { moveRecordingToDocuments } from "@/utils/moveRecordingToDocuments";
 
 const MAX_MS = 30000;
 const sampleIntervalMs = 200;
 
-export default function Index() {
+export default function useAudioRecorderHook() {
   const [audioUri, setAudioUri] = useState<string | null>(null);
   const [createdAt, setCreatedAt] = useState<string | null>(null);
   const [dateKey, setDateKey] = useState<string | null>(null);
@@ -19,7 +26,20 @@ export default function Index() {
     accuracy: number | null;
   } | null>(null);
 
-  const recorder = useAudioRecorder({ ...RecordingPresets.HIGH_QUALITY, isMeteringEnabled: true });
+  const recorder = useAudioRecorder({
+    ...RecordingPresets.HIGH_QUALITY,
+    isMeteringEnabled: true,
+    numberOfChannels: 2,
+    ios: {
+      ...RecordingPresets.HIGH_QUALITY.ios,
+      extension: ".wav",
+      outputFormat: IOSOutputFormat.LINEARPCM,
+      audioQuality: AudioQuality.MAX,
+      linearPCMBitDepth: 16,
+      linearPCMIsBigEndian: false,
+      linearPCMIsFloat: false,
+    },
+  });
   const recorderState = useAudioRecorderState(recorder, sampleIntervalMs);
   const latestDecibel = useRef<number | null>(null);
   const { fetchLocationOnce } = useFetchLocationOnce();
@@ -46,6 +66,10 @@ export default function Index() {
   //録音開始
   const startRecording = async () => {
     try {
+      await setAudioModeAsync({
+        allowsRecording: true,
+        playsInSilentMode: true,
+      });
       const now = new Date();
       const iso = now.toISOString();
       setCreatedAt(iso);
@@ -79,6 +103,11 @@ export default function Index() {
       setDurationMs(recorderState.durationMillis ?? 0);
     } catch (e: any) {
       Alert.alert("録音停止に失敗しました", String(e?.message ?? e));
+    } finally {
+      await setAudioModeAsync({
+        allowsRecording: false,
+        playsInSilentMode: true,
+      });
     }
   };
 

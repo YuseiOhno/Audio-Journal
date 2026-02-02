@@ -123,7 +123,7 @@ export default function Archives() {
                   <Text style={styles.rowTitle} numberOfLines={1} ellipsizeMode="tail">
                     {item.recording_title}
                   </Text>
-                  <Text style={styles.rowDuration}>{formatSeconds(item.duration_ms)}s</Text>
+                  <Text style={styles.rowDuration}>{formatSeconds(item.duration_ms)}</Text>
                 </View>
                 <Text style={styles.rowMeta}>{formatCreatedAtLocal(item.created_at)}</Text>
                 <Text style={styles.rowMeta}>
@@ -160,7 +160,7 @@ export default function Archives() {
               waveformLength={selected?.waveform_length}
               waveformSampleIntervalMs={selected?.waveform_sample_interval_ms}
             />
-            <AudioPlayer />
+            <AudioPlayer audioUri={selected?.audio_uri ?? ""} />
           </BottomSheetView>
         </BottomSheet>
       </GestureHandlerRootView>

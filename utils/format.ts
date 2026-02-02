@@ -28,11 +28,6 @@ export function splitDateKey(dateKey: string): DateKeyParts | null {
   return { year, month, day };
 }
 
-export function formatSeconds(ms: number) {
-  const sec = Math.floor(ms / 100) / 10;
-  return Number.isInteger(sec) ? sec : sec.toFixed(1);
-}
-
 export function formatCreatedAtLocal(iso: string) {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return iso;
@@ -44,3 +39,17 @@ export function formatCreatedAtLocal(iso: string) {
   const minute = pad(date.getMinutes());
   return `${year}/${month}/${day} ${hour}:${minute}`;
 }
+
+//ms to s
+export function formatSeconds(ms: number) {
+  const sec = Math.floor(ms / 100) / 10;
+  return formatTime(sec);
+}
+
+//s to 00:00
+export const formatTime = (seconds?: number | null) => {
+  const total = Math.max(0, Math.floor(seconds ?? 0));
+  const m = Math.floor(total / 60);
+  const s = total % 60;
+  return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+};

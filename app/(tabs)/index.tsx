@@ -1,5 +1,5 @@
 import { Alert, Text, View, KeyboardAvoidingView } from "react-native";
-import { AudioModule, setAudioModeAsync } from "expo-audio";
+import { AudioModule } from "expo-audio";
 import * as Location from "expo-location";
 import { useEffect, useRef, useState } from "react";
 
@@ -49,12 +49,6 @@ export default function Index() {
       const status = await AudioModule.requestRecordingPermissionsAsync();
       if (!status.granted) {
         Alert.alert("マイク権限が必要です", "設定でマイクを許可してください。");
-      }
-      if (status.granted) {
-        await setAudioModeAsync({
-          playsInSilentMode: true,
-          allowsRecording: true,
-        });
       }
     })();
   }, []);

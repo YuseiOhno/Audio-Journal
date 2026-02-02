@@ -1,21 +1,42 @@
-import React, { useState } from "react";
+import React from "react";
 
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 import { Slider } from "@tamagui/slider";
 import { View, Pressable, Text } from "react-native";
+import useAudioPlayerHook from "@/hooks/useAudioPlayerHook";
+import { formatTime } from "@/utils/format";
 
-export default function AudioPlayer() {
-  const [play, setPlay] = useState(false);
+type AudioPlayerProps = {
+  audioUri?: string | null;
+};
+
+export default function AudioPlayer({ audioUri }: AudioPlayerProps) {
+  const { status, togglePlayPause, seekToForward, seekToReplay, seekToTime, canPlay } =
+    useAudioPlayerHook(audioUri);
+
+  const durationMs = Math.round((status?.duration ?? 0) * 1000);
+  const currentTimeMs = Math.round((status?.currentTime ?? 0) * 1000);
+
   return (
     <View style={{ width: "100%" }}>
       <View style={{ flexDirection: "column" }}>
         <View style={{ flexDirection: "row", alignItems: "center", marginTop: 30 }}>
-          <Slider defaultValue={[0]} min={0} max={100} step={1} width={"100%"} size="$1">
+          <Slider
+            value={[Math.min(currentTimeMs, durationMs)]}
+            min={0}
+            max={durationMs}
+            step={100}
+            width={"100%"}
+            size="$1"
+            onValueChange={(value) => {
+              seekToTime(value[0] / 1000);
+            }}
+          >
             <Slider.Track backgroundColor="rgba(230, 230, 230, 0.3)">
               <Slider.TrackActive backgroundColor="#333333" />
             </Slider.Track>
-            <Slider.Thumb circular index={0} />
+            <Slider.Thumb circular index={0} opacity={0} />
           </Slider>
         </View>
         <View
@@ -26,21 +47,21 @@ export default function AudioPlayer() {
             marginTop: 10,
           }}
         >
-          <Text style={{ fontSize: 14 }}>0:00</Text>
-          <Text style={{ fontSize: 14 }}>3:00</Text>
+          <Text style={{ fontSize: 14 }}>{formatTime(currentTimeMs / 1000)}</Text>
+          <Text style={{ fontSize: 14 }}>{formatTime(durationMs / 1000)}</Text>
         </View>
       </View>
       <View
         style={{ flexDirection: "row", justifyContent: "center", alignItems: "center", gap: "25" }}
       >
         {/* 10秒戻る */}
-        <Pressable style={pressableOpacity}>
+        <Pressable onPress={seekToReplay} style={pressableOpacity}>
           <MaterialIcons name="replay-10" size={35} color="#333333" />
         </Pressable>
 
         {/* 再生 */}
-        <Pressable onPress={() => setPlay((prev) => !prev)} style={pressableOpacity}>
-          {play ? (
+        <Pressable onPress={togglePlayPause} style={pressableOpacity} disabled={!canPlay}>
+          {status?.playing ? (
             <MaterialIcons name="pause" size={50} color="#333333" />
           ) : (
             <MaterialIcons name="play-arrow" size={50} color="#333333" />
@@ -48,7 +69,7 @@ export default function AudioPlayer() {
         </Pressable>
 
         {/* 10秒進む */}
-        <Pressable style={pressableOpacity}>
+        <Pressable onPress={seekToForward} style={pressableOpacity}>
           <MaterialIcons name="forward-10" size={35} color="#333333" />
         </Pressable>
       </View>
