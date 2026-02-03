@@ -20,7 +20,7 @@ export default function AudioPlayer({ audioUri }: AudioPlayerProps) {
 
   return (
     <View style={{ width: "100%" }}>
-      <View style={{ flexDirection: "column" }}>
+      <View style={{ flexDirection: "column", height: 60 }}>
         <View style={{ flexDirection: "row", alignItems: "center", marginTop: 30 }}>
           <Slider
             value={[Math.min(currentTimeMs, durationMs)]}
@@ -52,7 +52,13 @@ export default function AudioPlayer({ audioUri }: AudioPlayerProps) {
         </View>
       </View>
       <View
-        style={{ flexDirection: "row", justifyContent: "center", alignItems: "center", gap: "25" }}
+        style={{
+          flexDirection: "row",
+          justifyContent: "center",
+          alignItems: "center",
+          gap: "25",
+          height: 60,
+        }}
       >
         {/* 10秒戻る */}
         <Pressable onPress={seekToReplay} style={pressableOpacity}>

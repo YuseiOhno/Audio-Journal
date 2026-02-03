@@ -1,6 +1,7 @@
 import { Alert, Text, View, KeyboardAvoidingView } from "react-native";
 import { AudioModule } from "expo-audio";
 import * as Location from "expo-location";
+import { useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 
 import { RecordButton } from "@/components/RecordButton";
@@ -34,6 +35,7 @@ export default function Index() {
   const [memoVisible, setMemoVisible] = useState(false);
   const lastAudioUriRef = useRef<string | null>(null);
   const waveformBufferRef = useRef<number[]>([]);
+  const router = useRouter();
 
   //test
   useEffect(() => {
@@ -96,6 +98,7 @@ export default function Index() {
       resetRecording();
       waveformBufferRef.current = [];
       lastAudioUriRef.current = null;
+      router.navigate("/(tabs)/archives");
     } catch (e: any) {
       Alert.alert("保存に失敗しました", String(e?.message ?? e));
     }

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import {
   View,
   TextInput,
@@ -10,9 +10,15 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-
-import BottomSheet, { BottomSheetView, BottomSheetBackdrop } from "@gorhom/bottom-sheet";
+import { useFocusEffect } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
+
+import BottomSheet, {
+  BottomSheetView,
+  BottomSheetBackdrop,
+  BottomSheetScrollView,
+  BottomSheetFooter,
+} from "@gorhom/bottom-sheet";
 
 import { getRecordingRecordById, getRecordings } from "@/db/repositories/recordings";
 import StaticWaveform from "@/components/StaticWaveform";
@@ -46,13 +52,19 @@ export default function Archives() {
   const searchBarHeight = 38;
   const searchBarMargin = 20;
 
-  useEffect(() => {
-    (async () => {
-      const result = await getRecordings();
-      setRows(result);
-    })();
+  //フォーカスのたびリフレッシュ
+  const loadRecordings = useCallback(async () => {
+    const result = await getRecordings();
+    setRows(result);
   }, []);
 
+  useFocusEffect(
+    useCallback(() => {
+      loadRecordings();
+    }, [loadRecordings]),
+  );
+
+  //サーチフィルター
   const filteredRows = useMemo(() => {
     const trimmed = query.trim().toLowerCase();
     if (!trimmed) return rows;
@@ -151,16 +163,30 @@ export default function Archives() {
           backdropComponent={(props) => (
             <BottomSheetBackdrop {...props} pressBehavior="close" opacity={0.3} />
           )}
+          footerComponent={(props) => (
+            <BottomSheetFooter {...props}>
+              <View
+                style={{
+                  paddingHorizontal: 36,
+                  paddingVertical: 12,
+                  backgroundColor: "rgba(181, 182, 182, 0.9)",
+                }}
+              >
+                <AudioPlayer audioUri={selected?.audio_uri ?? ""} />
+              </View>
+            </BottomSheetFooter>
+          )}
         >
           <BottomSheetView style={styles.bsViewContainer}>
-            <Text style={styles.bsTitle}>{selected?.recording_title ?? "Untitled"}</Text>
-            <Text style={styles.bsMeta}>{selected?.audio_uri ?? ""}</Text>
-            <StaticWaveform
-              waveform={selected?.waveform_blob}
-              waveformLength={selected?.waveform_length}
-              waveformSampleIntervalMs={selected?.waveform_sample_interval_ms}
-            />
-            <AudioPlayer audioUri={selected?.audio_uri ?? ""} />
+            <BottomSheetScrollView>
+              <Text style={styles.bsTitle}>{selected?.recording_title ?? "Untitled"}</Text>
+              <Text style={styles.bsMeta}>{selected?.audio_uri ?? ""}</Text>
+              <StaticWaveform
+                waveform={selected?.waveform_blob}
+                waveformLength={selected?.waveform_length}
+                waveformSampleIntervalMs={selected?.waveform_sample_interval_ms}
+              />
+            </BottomSheetScrollView>
           </BottomSheetView>
         </BottomSheet>
       </GestureHandlerRootView>
@@ -285,7 +311,6 @@ const styles = StyleSheet.create({
   bsViewContainer: {
     flex: 1,
     padding: 36,
-    alignItems: "center",
   },
   bsTitle: {
     fontSize: 18,
