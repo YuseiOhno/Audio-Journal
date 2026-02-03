@@ -1,17 +1,21 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import {
+  Animated,
   View,
   TextInput,
   TouchableOpacity,
   StyleSheet,
   Text,
-  FlatList,
   Pressable,
+  useWindowDimensions,
+  Keyboard,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useFocusEffect } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { BlurView } from "expo-blur";
 
 import BottomSheet, {
   BottomSheetView,
@@ -45,10 +49,21 @@ export default function Archives() {
   const [query, setQuery] = useState("");
   const [rows, setRows] = useState<RecordingRow[]>([]);
   const [selected, setSelected] = useState<RecordingRow>();
+  const [contentHeight, setContentHeight] = useState(1);
+  const [waveformBottom, setWaveformBottom] = useState<number | null>(null);
+  const [footerHeight, setFooterHeight] = useState(0);
   const bottomSheetRef = useRef<BottomSheet>(null);
-  const { top } = useSafeAreaInsets();
-  const snapPoints = useMemo(() => ["25%", "90%"], []);
+  const searchInputRef = useRef<TextInput>(null);
+  const scrollY = useRef(new Animated.Value(0)).current;
 
+  const { top } = useSafeAreaInsets();
+  const { height: windowHeight } = useWindowDimensions();
+  const snapPoints = useMemo(() => {
+    const maxSnap = Math.max(1, Math.floor(windowHeight * 0.9));
+    const waveformSnap = waveformBottom == null ? contentHeight : waveformBottom + footerHeight;
+    const clampedWaveformSnap = Math.max(1, Math.min(waveformSnap, maxSnap));
+    return [clampedWaveformSnap, "90%"];
+  }, [contentHeight, footerHeight, waveformBottom, windowHeight]);
   const searchBarHeight = 38;
   const searchBarMargin = 20;
 
@@ -72,7 +87,8 @@ export default function Archives() {
       return (
         String(row.id).includes(trimmed) ||
         row.date_key.toLowerCase().includes(trimmed) ||
-        row.created_at.toLowerCase().includes(trimmed)
+        row.recording_title?.toLowerCase().includes(trimmed) ||
+        row.memo?.toLowerCase().includes(trimmed)
       );
     });
   }, [query, rows]);
@@ -85,12 +101,26 @@ export default function Archives() {
     return { year: String(parts.year), monthDay: `${month}${day}` };
   };
 
+  const headerOpacity = scrollY.interpolate({
+    inputRange: [0, 80],
+    outputRange: [0, 1],
+    extrapolate: "clamp",
+  });
+  const AnimatedBlurView = useMemo(() => Animated.createAnimatedComponent(BlurView), []);
+
   return (
     <View style={styles.container}>
       <View style={[styles.searchBarWrap, { paddingTop: top + searchBarMargin }]}>
+        <AnimatedBlurView
+          intensity={20}
+          tint="light"
+          style={[StyleSheet.absoluteFillObject, { opacity: headerOpacity }]}
+          pointerEvents="none"
+        />
         <View style={[styles.searchBar, { height: searchBarHeight }]}>
           <Ionicons name="search-outline" size={18} color="#666666" />
           <TextInput
+            ref={searchInputRef}
             value={query}
             onChangeText={setQuery}
             placeholder="Search"
@@ -108,22 +138,32 @@ export default function Archives() {
         </TouchableOpacity>
       </View>
 
-      <FlatList
+      <Animated.FlatList
         data={filteredRows}
         keyExtractor={(item) => String(item.id)}
         contentContainerStyle={[
           styles.listContent,
           { paddingTop: top + searchBarMargin + searchBarHeight + 16 },
         ]}
+        onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], {
+          useNativeDriver: false,
+        })}
+        scrollEventThrottle={16}
         renderItem={({ item }) => {
           const { year, monthDay } = getDateParts(item.date_key);
           return (
             <Pressable
               style={styles.rowCard}
               onPress={async () => {
+                if (searchInputRef.current?.isFocused()) {
+                  searchInputRef.current.blur();
+                  Keyboard.dismiss();
+                }
                 const record = await getRecordingRecordById(item.id);
                 setSelected(record);
-                bottomSheetRef.current?.snapToIndex(1);
+                requestAnimationFrame(() => {
+                  bottomSheetRef.current?.snapToIndex(1);
+                });
               }}
             >
               <View style={styles.rowLeft}>
@@ -159,6 +199,8 @@ export default function Archives() {
           index={-1}
           snapPoints={snapPoints}
           enablePanDownToClose
+          keyboardBehavior="interactive"
+          keyboardBlurBehavior="restore"
           backgroundStyle={styles.bottomSheetBackground}
           backdropComponent={(props) => (
             <BottomSheetBackdrop {...props} pressBehavior="close" opacity={0.3} />
@@ -166,6 +208,7 @@ export default function Archives() {
           footerComponent={(props) => (
             <BottomSheetFooter {...props}>
               <View
+                onLayout={(e) => setFooterHeight(e.nativeEvent.layout.height)}
                 style={{
                   paddingHorizontal: 36,
                   paddingVertical: 12,
@@ -178,14 +221,42 @@ export default function Archives() {
           )}
         >
           <BottomSheetView style={styles.bsViewContainer}>
-            <BottomSheetScrollView>
-              <Text style={styles.bsTitle}>{selected?.recording_title ?? "Untitled"}</Text>
-              <Text style={styles.bsMeta}>{selected?.audio_uri ?? ""}</Text>
-              <StaticWaveform
-                waveform={selected?.waveform_blob}
-                waveformLength={selected?.waveform_length}
-                waveformSampleIntervalMs={selected?.waveform_sample_interval_ms}
-              />
+            <BottomSheetScrollView contentContainerStyle={{ paddingBottom: footerHeight + 16 }}>
+              <View style={{ height: 36, marginLeft: "auto", alignItems: "center" }}>
+                <Pressable
+                  style={({ pressed }: { pressed: boolean }) => [{ opacity: pressed ? 0.6 : 1 }]}
+                >
+                  <MaterialIcons name="more-horiz" size={30} color="#555555" />
+                </Pressable>
+              </View>
+              <View onLayout={(e) => setContentHeight(e.nativeEvent.layout.height)}>
+                <Text style={styles.bsMeta}>Title : {selected?.recording_title ?? "Untitled"}</Text>
+                <Text style={styles.bsMeta}>
+                  Duration : {formatSeconds(selected?.duration_ms ?? 0)}
+                </Text>
+                <Text style={styles.bsMeta}>
+                  Time : {formatCreatedAtLocal(selected?.created_at ?? "null")}
+                </Text>
+                <Text style={styles.bsMeta}>
+                  Location :{" "}
+                  {selected?.lat == null || selected?.lng == null
+                    ? "null"
+                    : `${selected?.lat.toFixed(6)}, ${selected?.lng.toFixed(6)} (±${selected?.accuracy === null ? "?" : Math.floor(selected?.accuracy)} m)`}
+                </Text>
+                <Text style={styles.bsMeta}>Memo : {selected?.memo}</Text>
+                <View
+                  onLayout={(e) => {
+                    const { y, height } = e.nativeEvent.layout;
+                    setWaveformBottom(y + height);
+                  }}
+                >
+                  <StaticWaveform
+                    waveform={selected?.waveform_blob}
+                    waveformLength={selected?.waveform_length}
+                    waveformSampleIntervalMs={selected?.waveform_sample_interval_ms}
+                  />
+                </View>
+              </View>
             </BottomSheetScrollView>
           </BottomSheetView>
         </BottomSheet>
@@ -205,8 +276,9 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     top: 0,
-    paddingHorizontal: 16,
     zIndex: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
@@ -310,12 +382,8 @@ const styles = StyleSheet.create({
   },
   bsViewContainer: {
     flex: 1,
-    padding: 36,
-  },
-  bsTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#222222",
+    paddingHorizontal: 36,
+    paddingBottom: 36,
   },
   bsMeta: {
     marginTop: 8,

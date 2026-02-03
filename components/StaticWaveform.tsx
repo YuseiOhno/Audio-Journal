@@ -14,7 +14,7 @@ export default function StaticWaveform({
 }: StaticWaveformProps) {
   const [containerWidth, setContainerWidth] = useState(0);
   const barGap = 1;
-  const borderWidth = 1;
+  const borderWidth = 0;
   const displayScale = 60;
   const maxMs = 30000;
   const targetBars = useMemo(() => {

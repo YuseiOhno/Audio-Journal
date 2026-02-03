@@ -5,13 +5,12 @@ import { useEffect, useMemo, useRef, useState } from "react";
  * UI表示はperformance.now()で補間して滑らかにする。
  *
  * @param durationMillisFromRecorder useAudioRecorderState(recorder).durationMillis
- * @param maxMs 例: 30000
  * @param isRunning 録音中のみ補間を回す
  */
 export function useSmoothCountdown(
   durationMillisFromRecorder: number | null | undefined,
   maxMs: number,
-  isRunning: boolean
+  isRunning: boolean,
 ) {
   // recorderから来た「最新の実測値」を保持
   const baseDurationMsRef = useRef<number>(0);
