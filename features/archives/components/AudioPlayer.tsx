@@ -4,8 +4,8 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 import { Slider } from "@tamagui/slider";
 import { View, Pressable, Text } from "react-native";
-import useAudioPlayerHook from "@/hooks/useAudioPlayerHook";
-import { formatTime } from "@/utils/format";
+import useAudioPlayerHook from "@/features/archives/hooks/useAudioPlayer";
+import { formatTime } from "@/core/lib/format";
 
 type AudioPlayerProps = {
   audioUri?: string | null;

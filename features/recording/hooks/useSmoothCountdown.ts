@@ -8,9 +8,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
  * @param isRunning 録音中のみ補間を回す
  */
 export function useSmoothCountdown(
-  durationMillisFromRecorder: number | null | undefined,
   maxMs: number,
   isRunning: boolean,
+  durationMillisFromRecorder?: number,
 ) {
   // recorderから来た「最新の実測値」を保持
   const baseDurationMsRef = useRef<number>(0);

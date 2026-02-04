@@ -6,9 +6,9 @@ type Props = {
   memo: string;
   onChangeMemo: (text: string) => void;
   recTitle: string;
-  onChnageRecTitle: (text: string) => void;
+  onChangeRecTitle: (text: string) => void;
   onSave: () => void;
-  onRetry: () => void;
+  onCancel: () => void;
 };
 
 export function MemoModal({
@@ -16,9 +16,9 @@ export function MemoModal({
   memo,
   onChangeMemo,
   recTitle,
-  onChnageRecTitle,
+  onChangeRecTitle,
   onSave,
-  onRetry,
+  onCancel,
 }: Props) {
   return (
     <Modal visible={visible} transparent animationType="fade">
@@ -27,7 +27,7 @@ export function MemoModal({
           <Text style={styles.title}>Recording Description</Text>
           <TextInput
             value={recTitle}
-            onChangeText={onChnageRecTitle}
+            onChangeText={onChangeRecTitle}
             placeholder="Title"
             placeholderTextColor="#888888"
             style={styles.recTitleInput}
@@ -43,7 +43,7 @@ export function MemoModal({
             maxLength={150}
           />
           <View style={styles.actions}>
-            <Pressable onPress={onRetry} style={[styles.button, styles.secondary]}>
+            <Pressable onPress={onCancel} style={[styles.button, styles.secondary]}>
               <Text style={styles.secondaryText}>Cancel</Text>
             </Pressable>
             <Pressable onPress={onSave} style={[styles.button, styles.primary]}>

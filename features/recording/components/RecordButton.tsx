@@ -3,17 +3,15 @@ import { Pressable, StyleSheet, View, Animated, Easing } from "react-native";
 
 type Props = {
   isRecording: boolean;
-  onStart: () => void;
-  onStop: () => void;
-  disabled?: boolean;
-  size?: number; // 例: 84
+  onPress: () => void;
 };
 
-export function RecordButton({ isRecording, onStart, onStop, disabled = false, size = 80 }: Props) {
+export function RecordButton({ isRecording, onPress }: Props) {
   const scale = useRef(new Animated.Value(1)).current;
   const pulse = useRef(new Animated.Value(0)).current;
   const pulseLoop = useRef<Animated.CompositeAnimation | null>(null);
 
+  const size = 80;
   const ringWidth = Math.max(6, Math.round(size * 0.09));
   const innerSize = size - ringWidth * 2;
 
@@ -34,7 +32,7 @@ export function RecordButton({ isRecording, onStart, onStop, disabled = false, s
           easing: Easing.inOut(Easing.quad),
           useNativeDriver: true,
         }),
-      ])
+      ]),
     );
     pulseLoop.current.start();
   };
@@ -57,20 +55,8 @@ export function RecordButton({ isRecording, onStart, onStop, disabled = false, s
     return pulse.interpolate({ inputRange: [0, 1], outputRange: [0, 1] });
   }, [pulse]);
 
-  const onPress = () => {
-    if (disabled) return;
-    if (isRecording) onStop();
-    else onStart();
-  };
-
   return (
-    <Pressable
-      onPress={onPress}
-      disabled={disabled}
-      accessibilityRole="button"
-      accessibilityLabel={isRecording ? "録音を停止" : "録音を開始"}
-      accessibilityState={{ disabled, selected: isRecording }}
-    >
+    <Pressable onPress={onPress}>
       <Animated.View
         style={[styles.container, { width: size, height: size, transform: [{ scale }] }]}
       >

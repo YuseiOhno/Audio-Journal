@@ -1,19 +1,21 @@
 import { useEffect, useMemo, useState } from "react";
 import { View, StyleSheet } from "react-native";
 
+type Props = {
+  recordingInProgress: boolean;
+  latestDecibel: React.RefObject<number | null>;
+  maxMs: number;
+  sampleIntervalMs: number;
+  waveformBufferRef: React.RefObject<number[]>;
+};
+
 export default function WaveformDisplay({
   recordingInProgress,
   latestDecibel,
   maxMs,
   sampleIntervalMs,
   waveformBufferRef,
-}: {
-  recordingInProgress: boolean;
-  latestDecibel: React.RefObject<number | null>;
-  maxMs: number;
-  sampleIntervalMs: number;
-  waveformBufferRef: React.RefObject<number[]>;
-}) {
+}: Props) {
   const [waveformHeights, setWaveformHeights] = useState<number[]>([]);
   const [containerWidth, setContainerWidth] = useState(0);
   const barGap = 1;

@@ -1,7 +1,7 @@
 import { Stack } from "expo-router";
 import { useState, useEffect } from "react";
+import { initDB } from "@/core/db";
 import { TamaguiProvider } from "@tamagui/core";
-import { initDB } from "@/db";
 import { config } from "@/tamagui.config";
 
 export default function RootLayout() {

@@ -1,5 +1,4 @@
 import { Alert } from "react-native";
-import { moveRecordingToDocuments } from "@/utils/moveRecordingToDocuments";
 import {
   useAudioRecorder,
   RecordingPresets,
@@ -9,8 +8,9 @@ import {
   AudioQuality,
 } from "expo-audio";
 import { useState, useEffect, useRef } from "react";
-import { useSmoothCountdown } from "@/hooks/useSmoothCountdown";
-import useFetchLocationOnce from "@/hooks/useFetchLocationOnce";
+import { useSmoothCountdown } from "@/features/recording/hooks/useSmoothCountdown";
+import useFetchLocationOnce from "@/features/recording/hooks/useFetchLocationOnce";
+import { moveRecordingToDocuments } from "@/features/recording/lib/moveRecordingToDocuments";
 
 const MAX_MS = 30000;
 const sampleIntervalMs = 200;
@@ -46,9 +46,9 @@ export default function useAudioRecorderHook() {
 
   //残り秒の計算
   const { remainingSecondsText } = useSmoothCountdown(
-    recorderState.durationMillis,
     MAX_MS,
     recorderState.isRecording,
+    recorderState.durationMillis,
   );
 
   //最新のdb値を参照、30秒で自動停止
@@ -57,9 +57,8 @@ export default function useAudioRecorderHook() {
     if (recorderState.metering != null) {
       latestDecibel.current = recorderState.metering;
     }
-    if ((recorderState.durationMillis ?? 0) >= MAX_MS) {
-      stopRecording().catch(() => {});
-    }
+    if ((recorderState.durationMillis ?? 0) >= MAX_MS) stopRecording();
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [recorderState.isRecording, recorderState.durationMillis]);
 

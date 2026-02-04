@@ -27,7 +27,7 @@ const updateWavePath = (
   amp: number,
   phase: number,
   waves = 2.5,
-  points = 80
+  points = 80,
 ) => {
   "worklet";
   path.reset();
@@ -44,7 +44,7 @@ const updateWavePath = (
   }
 };
 
-export default function WavyLineDisplay({ recordingInProgress, latestDecibel }: Props) {
+export default function LevelLineDisplay({ recordingInProgress, latestDecibel }: Props) {
   const W = 320; // まず固定でOK（あとで onLayout で可変にできる）
   const H = 120;
   const yMid = H / 2;
@@ -66,7 +66,7 @@ export default function WavyLineDisplay({ recordingInProgress, latestDecibel }: 
     phase.value = withRepeat(
       withTiming(Math.PI * 2, { duration: 900, easing: Easing.linear }),
       -1,
-      false
+      false,
     );
 
     const interval = setInterval(() => {

@@ -1,5 +1,5 @@
-import { db } from "@/db";
-import { fromWaveformBlob, toWaveformBlob } from "@/utils/waveformBlob";
+import { db } from "@/core/db";
+import { fromWaveformBlob, toWaveformBlob } from "@/core/lib/waveformBlob";
 
 type RecordingInsert = {
   dateKey: string;
