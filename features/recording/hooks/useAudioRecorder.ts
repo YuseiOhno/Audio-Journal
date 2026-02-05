@@ -18,10 +18,8 @@ const MAX_MS = 30000;
 const sampleIntervalMs = 200;
 
 export default function useAudioRecorderHook() {
-  const [audioUri, setAudioUri] = useState<string | null>(null);
   const [createdAt, setCreatedAt] = useState<string | null>(null);
   const [dateKey, setDateKey] = useState<string | null>(null);
-  const [durationMs, setDurationMs] = useState<number | null>(null);
   const [location, setLocation] = useState<GeoPoint | null>(null);
 
   const recorder = useAudioRecorder({
@@ -49,13 +47,12 @@ export default function useAudioRecorderHook() {
     recorderState.durationMillis,
   );
 
-  //最新のdb値を参照、30秒で自動停止
+  //最新のdb値を参照
   useEffect(() => {
     if (!recorderState.isRecording) return;
     if (recorderState.metering != null) {
       latestDecibel.current = recorderState.metering;
     }
-    if ((recorderState.durationMillis ?? 0) >= MAX_MS) stopRecording();
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [recorderState.isRecording, recorderState.durationMillis]);
@@ -71,7 +68,6 @@ export default function useAudioRecorderHook() {
       const iso = now.toISOString();
       setCreatedAt(iso);
       setDateKey(iso.slice(0, 10));
-      setAudioUri(null);
       const locationPromise = fetchLocationOnce();
       await recorder.prepareToRecordAsync();
       recorder.record();
@@ -87,19 +83,20 @@ export default function useAudioRecorderHook() {
   };
 
   //録音停止
-  const stopRecording = async () => {
+  const stopRecording = async (): Promise<{ audioUri: string; durationMs: number } | null> => {
     try {
       await recorder.stop();
       const uri = recorder.uri;
       if (!uri) {
         Alert.alert("録音データが取得できませんでした");
-        return;
+        return null;
       }
       const newUri = await moveRecordingToDocuments(uri);
-      setAudioUri(newUri);
-      setDurationMs(recorderState.durationMillis ?? 0);
+      const duration = recorderState.durationMillis ?? 0;
+      return { audioUri: newUri, durationMs: duration };
     } catch (e: any) {
       Alert.alert("録音停止に失敗しました", String(e?.message ?? e));
+      return null;
     } finally {
       await setAudioModeAsync({
         allowsRecording: false,
@@ -109,16 +106,14 @@ export default function useAudioRecorderHook() {
   };
 
   const resetRecording = () => {
-    setAudioUri(null);
     setCreatedAt(null);
     setDateKey(null);
-    setDurationMs(null);
     setLocation(null);
   };
 
   return {
-    audioUri,
     recordingInProgress: recorderState.isRecording,
+    currentDurationMs: recorderState.durationMillis ?? 0,
     startRecording,
     stopRecording,
     remainingSecondsText,
@@ -126,7 +121,6 @@ export default function useAudioRecorderHook() {
     location,
     createdAt,
     dateKey,
-    durationMs,
     resetRecording,
     MAX_MS,
     sampleIntervalMs,

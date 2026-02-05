@@ -2,7 +2,7 @@ import { Alert, Text, View, KeyboardAvoidingView } from "react-native";
 import { AudioModule } from "expo-audio";
 import * as Location from "expo-location";
 import { useRouter } from "expo-router";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { RecordButton } from "@/features/recording/components/RecordButton";
 import WaveformDisplay from "@/features/recording/components/WaveformDisplay";
@@ -13,10 +13,12 @@ import useAudioRecorderHook from "@/features/recording/hooks/useAudioRecorder";
 
 import { insertRecording } from "@/core/db/repositories/recordings";
 import type { RecordingDraft } from "@/core/types/types";
+import { useRecordingDraftStore } from "../store/recordingDraftStore";
 
 export default function RecordingScreen() {
   const {
     recordingInProgress,
+    currentDurationMs,
     startRecording,
     stopRecording,
     resetRecording,
@@ -25,8 +27,6 @@ export default function RecordingScreen() {
     MAX_MS,
     dateKey,
     createdAt,
-    audioUri,
-    durationMs,
     location,
     sampleIntervalMs,
   } = useAudioRecorderHook();
@@ -34,9 +34,10 @@ export default function RecordingScreen() {
   const [memo, setMemo] = useState("");
   const [recTitle, setRecTitle] = useState("");
   const [memoVisible, setMemoVisible] = useState(false);
-  const lastAudioUriRef = useRef<string | null>(null);
   const waveformBufferRef = useRef<number[]>([]);
   const router = useRouter();
+  const setDraft = useRecordingDraftStore((state) => state.setDraft);
+  const autoStopTriggeredRef = useRef(false);
 
   //test
   // useEffect(() => {
@@ -67,57 +68,111 @@ export default function RecordingScreen() {
   }, []);
 
   //audioUriが更新されるとモーダル表示
-  useEffect(() => {
-    if (audioUri && audioUri !== lastAudioUriRef.current) {
-      setMemo("");
-      setRecTitle("");
-      setMemoVisible(true);
-      lastAudioUriRef.current = audioUri;
-    }
-  }, [audioUri]);
+  // useEffect(() => {
+  //   if (audioUri && audioUri !== lastAudioUriRef.current) {
+  //     setMemo("");
+  //     setRecTitle("");
+  //     setMemoVisible(true);
+  //     lastAudioUriRef.current = audioUri;
+  //   }
+  // }, [audioUri]);
 
   //モーダル：保存
-  const handleSaveDB = async () => {
-    if (!audioUri || !createdAt || !dateKey || !durationMs) return;
-    const memoValue = memo.trim() === "" ? "N/A" : memo;
-    const titleValue = recTitle.trim() === "" ? "Untitled" : recTitle;
+  // const handleSaveDB = async () => {
+  //   if (!audioUri || !createdAt || !dateKey || !durationMs) return;
+  //   const memoValue = memo.trim() === "" ? "N/A" : memo;
+  //   const titleValue = recTitle.trim() === "" ? "Untitled" : recTitle;
 
-    const draft: RecordingDraft = {
-      dateKey,
-      createdAt,
-      audioUri,
-      durationMs,
-      location,
-      memo: memoValue,
-      waveform: waveformBufferRef.current,
-      waveformSampleIntervalMs: sampleIntervalMs,
-      recording_title: titleValue,
-    };
+  //   const draft: RecordingDraft = {
+  //     dateKey,
+  //     createdAt,
+  //     audioUri,
+  //     durationMs,
+  //     location,
+  //     memo: memoValue,
+  //     waveform: waveformBufferRef.current,
+  //     waveformSampleIntervalMs: sampleIntervalMs,
+  //     recording_title: titleValue,
+  //   };
 
-    try {
-      await insertRecording(draft);
-      setMemoVisible(false);
-      resetRecording();
-      waveformBufferRef.current = [];
-      lastAudioUriRef.current = null;
-      router.navigate("/(tabs)/archives");
-    } catch (e: any) {
-      Alert.alert("保存に失敗しました", String(e?.message ?? e));
-    }
-  };
+  //   try {
+  //     await insertRecording(draft);
+  //     setMemoVisible(false);
+  //     resetRecording();
+  //     waveformBufferRef.current = [];
+  //     lastAudioUriRef.current = null;
+  //     router.navigate("/(tabs)/archives");
+  //   } catch (e: any) {
+  //     Alert.alert("保存に失敗しました", String(e?.message ?? e));
+  //   }
+  // };
 
   //モーダル：キャンセル
-  const handleRetry = () => {
-    setMemoVisible(false);
-    resetRecording();
-    waveformBufferRef.current = [];
-    lastAudioUriRef.current = null;
+  // const handleRetry = () => {
+  //   setMemoVisible(false);
+  //   resetRecording();
+  //   waveformBufferRef.current = [];
+  //   lastAudioUriRef.current = null;
+  // };
+
+  //Draft作成
+  const handleStop = useCallback(
+    async (result: { audioUri: string; durationMs: number }) => {
+      if (!createdAt || !dateKey) return;
+
+      setDraft({
+        dateKey,
+        createdAt,
+        audioUri: result.audioUri,
+        durationMs: result.durationMs,
+        location,
+        memo: "",
+        waveform: waveformBufferRef.current,
+        waveformSampleIntervalMs: sampleIntervalMs,
+        recording_title: "",
+      });
+      waveformBufferRef.current = [];
+      resetRecording();
+
+      router.navigate("/(tabs)/edit");
+    },
+    [createdAt, dateKey, location, router, sampleIntervalMs, setDraft, resetRecording],
+  );
+
+  //30秒タイマー、handleStop実行
+  useEffect(() => {
+    if (!recordingInProgress) {
+      autoStopTriggeredRef.current = false;
+      return;
+    }
+    if (autoStopTriggeredRef.current) return;
+    if (currentDurationMs >= MAX_MS) {
+      autoStopTriggeredRef.current = true;
+      (async () => {
+        const result = await stopRecording();
+        if (result) {
+          await handleStop(result);
+        }
+      })();
+    }
+  }, [recordingInProgress, currentDurationMs, MAX_MS, stopRecording, handleStop]);
+
+  //録音スタート、ストップ
+  const onPressRecord = async () => {
+    if (recordingInProgress) {
+      const result = await stopRecording();
+      if (result) {
+        await handleStop(result);
+      }
+    } else {
+      await startRecording();
+    }
   };
 
   return (
     <View style={{ flex: 1, padding: 16, gap: 12, backgroundColor: "#B5B6B6" }}>
       <KeyboardAvoidingView behavior={"padding"}>
-        <MemoModal
+        {/* <MemoModal
           visible={memoVisible}
           memo={memo}
           onChangeMemo={setMemo}
@@ -125,7 +180,7 @@ export default function RecordingScreen() {
           onChangeRecTitle={setRecTitle}
           onSave={handleSaveDB}
           onCancel={handleRetry}
-        />
+        /> */}
       </KeyboardAvoidingView>
 
       <LevelLineDisplay recordingInProgress={recordingInProgress} latestDecibel={latestDecibel} />
@@ -164,10 +219,7 @@ export default function RecordingScreen() {
           alignItems: "flex-end",
         }}
       >
-        <RecordButton
-          isRecording={recordingInProgress}
-          onPress={() => (recordingInProgress ? stopRecording() : startRecording())}
-        />
+        <RecordButton isRecording={recordingInProgress} onPress={onPressRecord} />
       </View>
       <View
         style={{
