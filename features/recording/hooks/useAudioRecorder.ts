@@ -12,6 +12,8 @@ import { useSmoothCountdown } from "@/features/recording/hooks/useSmoothCountdow
 import useFetchLocationOnce from "@/features/recording/hooks/useFetchLocationOnce";
 import { moveRecordingToDocuments } from "@/features/recording/lib/moveRecordingToDocuments";
 
+import { GeoPoint } from "@/core/types/types";
+
 const MAX_MS = 30000;
 const sampleIntervalMs = 200;
 
@@ -20,11 +22,7 @@ export default function useAudioRecorderHook() {
   const [createdAt, setCreatedAt] = useState<string | null>(null);
   const [dateKey, setDateKey] = useState<string | null>(null);
   const [durationMs, setDurationMs] = useState<number | null>(null);
-  const [location, setLocation] = useState<{
-    lat: number;
-    lng: number;
-    accuracy: number | null;
-  } | null>(null);
+  const [location, setLocation] = useState<GeoPoint | null>(null);
 
   const recorder = useAudioRecorder({
     ...RecordingPresets.HIGH_QUALITY,
@@ -79,7 +77,7 @@ export default function useAudioRecorderHook() {
       recorder.record();
       const loc = await locationPromise;
       if (loc.ok) {
-        setLocation({ lat: loc.lat, lng: loc.lng, accuracy: loc.accuracy });
+        setLocation(loc.location);
       } else {
         setLocation(null);
       }

@@ -29,22 +29,7 @@ import StaticWaveform from "@/features/archives/components/StaticWaveform";
 import AudioPlayer from "@/features/archives/components/AudioPlayer";
 import { splitDateKey, formatSeconds, formatCreatedAtLocal } from "@/core/lib/format";
 import PopupMenu from "@/features/archives/components/PopupMenu";
-
-type RecordingRow = {
-  id: number;
-  date_key: string;
-  created_at: string;
-  audio_uri: string;
-  duration_ms: number;
-  lat: number | null;
-  lng: number | null;
-  accuracy: number | null;
-  memo: string | null;
-  waveform_blob: number[] | null;
-  waveform_length: number;
-  waveform_sample_interval_ms: number;
-  recording_title: string | null;
-};
+import { RecordingRow } from "@/core/types/types";
 
 export default function ArchivesScreen() {
   const [query, setQuery] = useState("");

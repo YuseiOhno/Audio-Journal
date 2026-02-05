@@ -1,12 +1,11 @@
 import { useCallback } from "react";
 import * as Location from "expo-location";
+import type { GeoPoint } from "@/core/types/types";
 
 type LocationResult =
   | {
       ok: true;
-      lat: number;
-      lng: number;
-      accuracy: number | null;
+      location: GeoPoint;
     }
   | { ok: false; reason: string };
 
@@ -19,9 +18,11 @@ export default function useFetchLocationOnce() {
 
       return {
         ok: true,
-        lat: position.coords.latitude,
-        lng: position.coords.longitude,
-        accuracy: position.coords.accuracy,
+        location: {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+          accuracy: position.coords.accuracy,
+        },
       };
     } catch (e: any) {
       return { ok: false, reason: String(e?.message ?? e) };

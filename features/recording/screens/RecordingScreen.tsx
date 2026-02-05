@@ -12,21 +12,22 @@ import { MemoModal } from "@/features/recording/components/MemoModal";
 import useAudioRecorderHook from "@/features/recording/hooks/useAudioRecorder";
 
 import { insertRecording } from "@/core/db/repositories/recordings";
+import type { RecordingDraft } from "@/core/types/types";
 
 export default function RecordingScreen() {
   const {
-    audioUri,
     recordingInProgress,
     startRecording,
     stopRecording,
+    resetRecording,
     remainingSecondsText,
     latestDecibel,
-    createdAt,
+    MAX_MS,
     dateKey,
+    createdAt,
+    audioUri,
     durationMs,
     location,
-    resetRecording,
-    MAX_MS,
     sampleIntervalMs,
   } = useAudioRecorderHook();
 
@@ -77,23 +78,24 @@ export default function RecordingScreen() {
 
   //モーダル：保存
   const handleSaveDB = async () => {
-    if (!audioUri || !createdAt || !dateKey) return;
+    if (!audioUri || !createdAt || !dateKey || !durationMs) return;
     const memoValue = memo.trim() === "" ? "N/A" : memo;
     const titleValue = recTitle.trim() === "" ? "Untitled" : recTitle;
+
+    const draft: RecordingDraft = {
+      dateKey,
+      createdAt,
+      audioUri,
+      durationMs,
+      location,
+      memo: memoValue,
+      waveform: waveformBufferRef.current,
+      waveformSampleIntervalMs: sampleIntervalMs,
+      recording_title: titleValue,
+    };
+
     try {
-      await insertRecording({
-        dateKey,
-        createdAt,
-        audioUri,
-        durationMs,
-        lat: location?.lat ?? null,
-        lng: location?.lng ?? null,
-        accuracy: location?.accuracy ?? null,
-        memo: memoValue,
-        waveform: waveformBufferRef.current,
-        waveformSampleIntervalMs: sampleIntervalMs,
-        recording_title: titleValue,
-      });
+      await insertRecording(draft);
       setMemoVisible(false);
       resetRecording();
       waveformBufferRef.current = [];
