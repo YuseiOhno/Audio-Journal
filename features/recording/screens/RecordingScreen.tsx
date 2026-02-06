@@ -2,17 +2,17 @@ import { Alert, Text, View, KeyboardAvoidingView } from "react-native";
 import { AudioModule } from "expo-audio";
 import * as Location from "expo-location";
 import { useRouter } from "expo-router";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 import { RecordButton } from "@/features/recording/components/RecordButton";
 import WaveformDisplay from "@/features/recording/components/WaveformDisplay";
 import LevelLineDisplay from "@/features/recording/components/LevelLineDisplay";
-import { MemoModal } from "@/features/recording/components/MemoModal";
+// import { MemoModal } from "@/features/recording/components/MemoModal";
 
 import useAudioRecorderHook from "@/features/recording/hooks/useAudioRecorder";
 
-import { insertRecording } from "@/core/db/repositories/recordings";
-import type { RecordingDraft } from "@/core/types/types";
+// import { insertRecording } from "@/core/db/repositories/recordings";
+// import type { RecordingDraft } from "@/core/types/types";
 import { useRecordingDraftStore } from "../store/recordingDraftStore";
 
 export default function RecordingScreen() {
@@ -31,9 +31,9 @@ export default function RecordingScreen() {
     sampleIntervalMs,
   } = useAudioRecorderHook();
 
-  const [memo, setMemo] = useState("");
-  const [recTitle, setRecTitle] = useState("");
-  const [memoVisible, setMemoVisible] = useState(false);
+  // const [memo, setMemo] = useState("");
+  // const [recTitle, setRecTitle] = useState("");
+  // const [memoVisible, setMemoVisible] = useState(false);
   const waveformBufferRef = useRef<number[]>([]);
   const router = useRouter();
   const setDraft = useRecordingDraftStore((state) => state.setDraft);
