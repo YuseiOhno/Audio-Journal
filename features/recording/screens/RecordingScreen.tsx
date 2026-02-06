@@ -1,4 +1,4 @@
-import { Alert, Text, View, KeyboardAvoidingView } from "react-native";
+import { Alert, Text, View } from "react-native";
 import { AudioModule } from "expo-audio";
 import * as Location from "expo-location";
 import { useRouter } from "expo-router";
@@ -7,12 +7,9 @@ import { useCallback, useEffect, useRef } from "react";
 import { RecordButton } from "@/features/recording/components/RecordButton";
 import WaveformDisplay from "@/features/recording/components/WaveformDisplay";
 import LevelLineDisplay from "@/features/recording/components/LevelLineDisplay";
-// import { MemoModal } from "@/features/recording/components/MemoModal";
 
 import useAudioRecorderHook from "@/features/recording/hooks/useAudioRecorder";
 
-// import { insertRecording } from "@/core/db/repositories/recordings";
-// import type { RecordingDraft } from "@/core/types/types";
 import { useRecordingDraftStore } from "../store/recordingDraftStore";
 
 export default function RecordingScreen() {
@@ -31,21 +28,10 @@ export default function RecordingScreen() {
     sampleIntervalMs,
   } = useAudioRecorderHook();
 
-  // const [memo, setMemo] = useState("");
-  // const [recTitle, setRecTitle] = useState("");
-  // const [memoVisible, setMemoVisible] = useState(false);
-  const waveformBufferRef = useRef<number[]>([]);
   const router = useRouter();
   const setDraft = useRecordingDraftStore((state) => state.setDraft);
+  const waveformBufferRef = useRef<number[]>([]);
   const autoStopTriggeredRef = useRef(false);
-
-  //test
-  // useEffect(() => {
-  //   (async () => {
-  //     const rows = await getTest();
-  //     console.log(rows);
-  //   })();
-  // }, [audioUri]);
 
   //マイク権限
   useEffect(() => {
@@ -67,54 +53,6 @@ export default function RecordingScreen() {
     })();
   }, []);
 
-  //audioUriが更新されるとモーダル表示
-  // useEffect(() => {
-  //   if (audioUri && audioUri !== lastAudioUriRef.current) {
-  //     setMemo("");
-  //     setRecTitle("");
-  //     setMemoVisible(true);
-  //     lastAudioUriRef.current = audioUri;
-  //   }
-  // }, [audioUri]);
-
-  //モーダル：保存
-  // const handleSaveDB = async () => {
-  //   if (!audioUri || !createdAt || !dateKey || !durationMs) return;
-  //   const memoValue = memo.trim() === "" ? "N/A" : memo;
-  //   const titleValue = recTitle.trim() === "" ? "Untitled" : recTitle;
-
-  //   const draft: RecordingDraft = {
-  //     dateKey,
-  //     createdAt,
-  //     audioUri,
-  //     durationMs,
-  //     location,
-  //     memo: memoValue,
-  //     waveform: waveformBufferRef.current,
-  //     waveformSampleIntervalMs: sampleIntervalMs,
-  //     recording_title: titleValue,
-  //   };
-
-  //   try {
-  //     await insertRecording(draft);
-  //     setMemoVisible(false);
-  //     resetRecording();
-  //     waveformBufferRef.current = [];
-  //     lastAudioUriRef.current = null;
-  //     router.navigate("/(tabs)/archives");
-  //   } catch (e: any) {
-  //     Alert.alert("保存に失敗しました", String(e?.message ?? e));
-  //   }
-  // };
-
-  //モーダル：キャンセル
-  // const handleRetry = () => {
-  //   setMemoVisible(false);
-  //   resetRecording();
-  //   waveformBufferRef.current = [];
-  //   lastAudioUriRef.current = null;
-  // };
-
   //Draft作成
   const handleStop = useCallback(
     async (result: { audioUri: string; durationMs: number }) => {
@@ -134,7 +72,7 @@ export default function RecordingScreen() {
       waveformBufferRef.current = [];
       resetRecording();
 
-      router.navigate("/(tabs)/edit");
+      router.push("/edit");
     },
     [createdAt, dateKey, location, router, sampleIntervalMs, setDraft, resetRecording],
   );
@@ -171,18 +109,6 @@ export default function RecordingScreen() {
 
   return (
     <View style={{ flex: 1, padding: 16, gap: 12, backgroundColor: "#B5B6B6" }}>
-      <KeyboardAvoidingView behavior={"padding"}>
-        {/* <MemoModal
-          visible={memoVisible}
-          memo={memo}
-          onChangeMemo={setMemo}
-          recTitle={recTitle}
-          onChangeRecTitle={setRecTitle}
-          onSave={handleSaveDB}
-          onCancel={handleRetry}
-        /> */}
-      </KeyboardAvoidingView>
-
       <LevelLineDisplay recordingInProgress={recordingInProgress} latestDecibel={latestDecibel} />
 
       <View style={{ flex: 2 }}>

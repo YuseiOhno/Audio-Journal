@@ -1,11 +1,11 @@
 import { Tabs } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { Text, TouchableOpacity } from "react-native";
 
 export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
+        animation: "none",
         headerTintColor: "#333333",
         headerStyle: { backgroundColor: "#B5B6B6" },
         headerShadowVisible: false,
@@ -34,48 +34,6 @@ export default function TabLayout() {
               color={color}
               size={30}
             />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="edit"
-        options={{
-          title: "タイトルとメモを追加",
-          href: null,
-          tabBarStyle: { display: "none" },
-          headerRight: () => (
-            <TouchableOpacity
-              style={{
-                backgroundColor: "rgba(230, 230, 230, 0.3)",
-                height: 36,
-                paddingHorizontal: 14,
-                paddingVertical: 6,
-                borderRadius: 20,
-                alignItems: "center",
-                justifyContent: "center",
-                marginRight: 16,
-                marginBottom: 6,
-              }}
-            >
-              <Ionicons name="save-outline" size={22} color="#333333" />
-            </TouchableOpacity>
-          ),
-          headerLeft: () => (
-            <TouchableOpacity
-              style={{
-                backgroundColor: "rgba(230, 230, 230, 0.3)",
-                height: 36,
-                paddingHorizontal: 14,
-                paddingVertical: 6,
-                borderRadius: 20,
-                alignItems: "center",
-                justifyContent: "center",
-                marginLeft: 16,
-                marginBottom: 6,
-              }}
-            >
-              <Ionicons name="chevron-back-outline" size={22} color="#333333" />
-            </TouchableOpacity>
           ),
         }}
       />

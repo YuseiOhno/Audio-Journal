@@ -24,6 +24,18 @@ export default function RootLayout() {
           name="(tabs)"
           options={{
             headerShown: false,
+            animation: "fade",
+          }}
+        />
+        <Stack.Screen
+          name="edit"
+          options={{
+            title: "タイトルとメモを追加",
+            headerStyle: { backgroundColor: "#B5B6B6" },
+            headerTintColor: "#333333",
+            headerShadowVisible: false,
+            animation: "slide_from_bottom",
+            contentStyle: { backgroundColor: "#B5B6B6" },
           }}
         />
       </Stack>

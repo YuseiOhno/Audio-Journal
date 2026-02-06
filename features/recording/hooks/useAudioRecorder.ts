@@ -1,4 +1,5 @@
 import { Alert } from "react-native";
+import { useState, useEffect, useRef } from "react";
 import {
   useAudioRecorder,
   RecordingPresets,
@@ -7,10 +8,8 @@ import {
   IOSOutputFormat,
   AudioQuality,
 } from "expo-audio";
-import { useState, useEffect, useRef } from "react";
 import { useSmoothCountdown } from "@/features/recording/hooks/useSmoothCountdown";
 import useFetchLocationOnce from "@/features/recording/hooks/useFetchLocationOnce";
-import { moveRecordingToDocuments } from "@/features/recording/lib/moveRecordingToDocuments";
 
 import { GeoPoint } from "@/core/types/types";
 
@@ -91,9 +90,8 @@ export default function useAudioRecorderHook() {
         Alert.alert("録音データが取得できませんでした");
         return null;
       }
-      const newUri = await moveRecordingToDocuments(uri);
       const duration = recorderState.durationMillis ?? 0;
-      return { audioUri: newUri, durationMs: duration };
+      return { audioUri: uri, durationMs: duration };
     } catch (e: any) {
       Alert.alert("録音停止に失敗しました", String(e?.message ?? e));
       return null;

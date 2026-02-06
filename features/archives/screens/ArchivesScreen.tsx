@@ -239,7 +239,9 @@ export default function ArchivesScreen() {
                     ? "null"
                     : `${selected?.lat.toFixed(6)}, ${selected?.lng.toFixed(6)} (±${selected?.accuracy === null ? "?" : Math.floor(selected?.accuracy)} m)`}
                 </Text>
-                <Text style={styles.bsMeta}>Memo : {selected?.memo}</Text>
+                <Text style={styles.bsMemo}>- Memo -</Text>
+                <Text style={styles.bsMeta}>{selected?.memo}</Text>
+
                 <View
                   onLayout={(e) => {
                     const { y, height } = e.nativeEvent.layout;
@@ -389,6 +391,11 @@ const styles = StyleSheet.create({
   },
   bsMeta: {
     marginTop: 8,
+    fontSize: 14,
+    color: "#555555",
+  },
+  bsMemo: {
+    marginTop: 16,
     fontSize: 14,
     color: "#555555",
   },
