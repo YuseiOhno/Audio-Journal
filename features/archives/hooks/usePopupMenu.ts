@@ -3,6 +3,7 @@ import { useActionSheet } from "@expo/react-native-action-sheet";
 import { useRouter } from "expo-router";
 import { File } from "expo-file-system";
 import { Alert } from "react-native";
+import { shareFile } from "./useFileSharing";
 
 type Props = {
   id?: number;
@@ -16,8 +17,8 @@ export default function usePopupMenu() {
   const router = useRouter();
 
   return ({ id, audioUri, refresh, onBottomSheetClosed }: Props) => {
-    const options = ["Edit", "Delete", "Cancel"];
-    const destructiveButtonIndex = 1; //red
+    const options = ["ファイルの共有", "編集", "削除", "キャンセル"];
+    const destructiveButtonIndex = 2; //red
 
     //Delete確認
     const confirmDelete = (id?: number, audioUri?: string) => {
@@ -48,6 +49,11 @@ export default function usePopupMenu() {
       }
     };
 
+    //ファイル共有
+    const handleShareFile = async (audioUri?: string) => {
+      if (audioUri) await shareFile(audioUri);
+    };
+
     showActionSheetWithOptions(
       {
         options,
@@ -58,6 +64,9 @@ export default function usePopupMenu() {
       (selectedIndex) => {
         switch (selectedIndex) {
           case 0:
+            handleShareFile(audioUri); //share
+            break;
+          case 1:
             if (id != null) {
               onBottomSheetClosed?.();
               router.push({ pathname: "/edit", params: { id: String(id) } }); //edit
@@ -66,7 +75,7 @@ export default function usePopupMenu() {
           case destructiveButtonIndex:
             confirmDelete(id, audioUri); //delete
             break;
-          case 2:
+          case 3:
             //cancel
             break;
         }
