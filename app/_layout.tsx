@@ -32,7 +32,7 @@ export default function RootLayout() {
           <Stack.Screen
             name="edit"
             options={{
-              title: "タイトルとメモを追加",
+              title: "タイトルとメモを編集",
               headerStyle: { backgroundColor: "#B5B6B6" },
               headerTintColor: "#333333",
               headerShadowVisible: false,

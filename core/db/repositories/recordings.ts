@@ -65,6 +65,18 @@ export async function deleteRecordingRecordById(id: number) {
   return result.changes > 0;
 }
 
+//レコードの編集
+export async function updateRecordingTitleMemoById(
+  id: number,
+  patch: { recording_title: string; memo: string },
+) {
+  const result = await db.runAsync(
+    "UPDATE recordings SET recording_title = ?, memo = ? WHERE id = ?",
+    [patch.recording_title, patch.memo, id],
+  );
+  return result.changes > 0;
+}
+
 //test
 export async function getTest() {
   const rows: any = await db.getAllAsync("SELECT * FROM recordings");

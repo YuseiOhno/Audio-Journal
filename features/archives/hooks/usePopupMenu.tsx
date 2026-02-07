@@ -1,10 +1,6 @@
-//modalを開く　要素以外をタップしたら閉じる
-//削除、編集、共有の項目
-//削除はファイル、DBの流れ
-//編集はmemoモーダルを使用
-
 import { deleteRecordingRecordById } from "@/core/db/repositories/recordings";
 import { useActionSheet } from "@expo/react-native-action-sheet";
+import { useRouter } from "expo-router";
 import { File } from "expo-file-system";
 import { Alert } from "react-native";
 
@@ -19,6 +15,7 @@ type Props = {
 
 export default function usePopupMenu() {
   const { showActionSheetWithOptions } = useActionSheet();
+  const router = useRouter();
 
   return ({ id, audioUri, title, memo, refresh, onBottomSheetClosed }: Props) => {
     const options = ["Edit", "Delete", "Cancel"];
@@ -63,13 +60,16 @@ export default function usePopupMenu() {
       (selectedIndex) => {
         switch (selectedIndex) {
           case 0:
-            console.log("edit");
+            if (id != null) {
+              onBottomSheetClosed?.();
+              router.push({ pathname: "/edit", params: { id: String(id) } }); //edit
+            }
             break;
           case destructiveButtonIndex:
-            confirmDelete(id, audioUri);
+            confirmDelete(id, audioUri); //delete
             break;
           case 2:
-            console.log("cancel");
+            //cancel
             break;
         }
       },
