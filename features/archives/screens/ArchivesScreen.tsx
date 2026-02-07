@@ -58,7 +58,7 @@ export default function ArchivesScreen() {
   //フォーカスのたびリフレッシュ
   const loadRecordings = useCallback(async () => {
     const result = await getRecordings();
-    setRows(result);
+    setRows(result ?? []);
   }, []);
 
   useFocusEffect(
@@ -226,6 +226,10 @@ export default function ArchivesScreen() {
                       audioUri: selected?.audio_uri,
                       title: selected?.recording_title,
                       memo: selected?.memo,
+                      refresh: () => loadRecordings(),
+                      onBottomSheetClosed: () => {
+                        bottomSheetRef.current?.close();
+                      },
                     })
                   }
                 >

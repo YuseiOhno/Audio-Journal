@@ -39,6 +39,7 @@ export async function insertRecording(data: RecordingDraft) {
   );
 }
 
+//一覧用のデータを取得
 export async function getRecordings() {
   const rows: any = await db.getAllAsync(
     "SELECT id, date_key, created_at, duration_ms, lat, lng, accuracy, recording_title FROM recordings",
@@ -50,6 +51,7 @@ export async function getRecordings() {
   }));
 }
 
+//IDをトリガーにレコードを取得
 export async function getRecordingRecordById(id: number) {
   const row: any = await db.getFirstAsync("SELECT * FROM recordings WHERE id = ?", [id]);
   if (!row) return null;
@@ -57,6 +59,13 @@ export async function getRecordingRecordById(id: number) {
   return { ...row, waveform_blob: row.waveform_blob ? fromWaveformBlob(row.waveform_blob) : null };
 }
 
+//IDをトリガーにレコードを削除
+export async function deleteRecordingRecordById(id: number) {
+  const result = await db.runAsync("DELETE FROM recordings WHERE id = ?", [id]);
+  return result.changes > 0;
+}
+
+//test
 export async function getTest() {
   const rows: any = await db.getAllAsync("SELECT * FROM recordings");
   if (!rows) return null;
