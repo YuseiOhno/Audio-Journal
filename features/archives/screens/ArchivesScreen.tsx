@@ -28,8 +28,8 @@ import { getRecordingRecordById, getRecordings } from "@/core/db/repositories/re
 import StaticWaveform from "@/features/archives/components/StaticWaveform";
 import AudioPlayer from "@/features/archives/components/AudioPlayer";
 import { splitDateKey, formatSeconds, formatCreatedAtLocal } from "@/core/lib/format";
-import PopupMenu from "@/features/archives/components/PopupMenu";
 import { RecordingRow } from "@/core/types/types";
+import usePopupMenu from "../hooks/usePopupMenu";
 
 export default function ArchivesScreen() {
   const [query, setQuery] = useState("");
@@ -53,6 +53,8 @@ export default function ArchivesScreen() {
   const searchBarHeight = 38;
   const searchBarMargin = 20;
 
+  const showPopupMenu = usePopupMenu();
+
   //フォーカスのたびリフレッシュ
   const loadRecordings = useCallback(async () => {
     const result = await getRecordings();
@@ -74,7 +76,7 @@ export default function ArchivesScreen() {
         String(row.id).includes(trimmed) ||
         row.date_key.toLowerCase().includes(trimmed) ||
         row.recording_title?.toLowerCase().includes(trimmed) ||
-        row.memo?.toLowerCase().includes(trimmed)
+        row.memo?.toLowerCase().includes(trimmed) //きいてない
       );
     });
   }, [query, rows]);
@@ -218,6 +220,14 @@ export default function ArchivesScreen() {
               >
                 <Pressable
                   style={({ pressed }: { pressed: boolean }) => [{ opacity: pressed ? 0.6 : 1 }]}
+                  onPress={() =>
+                    showPopupMenu({
+                      id: selected?.id,
+                      audioUri: selected?.audio_uri,
+                      title: selected?.recording_title,
+                      memo: selected?.memo,
+                    })
+                  }
                 >
                   <MaterialIcons name="more-horiz" size={30} color="#555555" />
                 </Pressable>
@@ -254,12 +264,6 @@ export default function ArchivesScreen() {
                     waveformSampleIntervalMs={selected?.waveform_sample_interval_ms}
                   />
                 </View>
-                <PopupMenu
-                  id={selected?.id}
-                  audioUri={selected?.audio_uri}
-                  title={selected?.recording_title}
-                  memo={selected?.memo}
-                />
               </View>
             </BottomSheetScrollView>
           </BottomSheetView>
