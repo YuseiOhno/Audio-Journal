@@ -7,8 +7,6 @@ import { Alert } from "react-native";
 type Props = {
   id?: number;
   audioUri?: string;
-  title?: string | null;
-  memo?: string | null;
   refresh: () => Promise<void>;
   onBottomSheetClosed?: () => void;
 };
@@ -17,7 +15,7 @@ export default function usePopupMenu() {
   const { showActionSheetWithOptions } = useActionSheet();
   const router = useRouter();
 
-  return ({ id, audioUri, title, memo, refresh, onBottomSheetClosed }: Props) => {
+  return ({ id, audioUri, refresh, onBottomSheetClosed }: Props) => {
     const options = ["Edit", "Delete", "Cancel"];
     const destructiveButtonIndex = 1; //red
 

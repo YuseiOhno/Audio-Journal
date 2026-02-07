@@ -5,7 +5,7 @@ import type { RecordingDraft } from "@/core/types/types";
 export async function insertRecording(data: RecordingDraft) {
   const waveformBlob = toWaveformBlob(data.waveform);
 
-  await db.runAsync(
+  const result = await db.runAsync(
     `
     INSERT INTO recordings (
       date_key,
@@ -37,6 +37,7 @@ export async function insertRecording(data: RecordingDraft) {
       data.recording_title,
     ],
   );
+  return result.lastInsertRowId;
 }
 
 //一覧用のデータを取得

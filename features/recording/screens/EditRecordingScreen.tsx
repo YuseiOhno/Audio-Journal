@@ -102,7 +102,10 @@ export default function EditRecordingScreen() {
           memo: finalDraft.memo,
         });
         clearDraft();
-        router.navigate("/(tabs)/archives");
+        router.navigate({
+          pathname: "/(tabs)/archives",
+          params: { openId: String(editId) },
+        });
         return;
       }
 
@@ -111,9 +114,12 @@ export default function EditRecordingScreen() {
         const newUri = await moveRecordingToDocuments(finalDraft.audioUri);
         finalDraft.audioUri = newUri;
       }
-      await insertRecording(finalDraft);
+      const newId = await insertRecording(finalDraft);
       clearDraft();
-      router.navigate("/(tabs)/archives");
+      router.navigate({
+        pathname: "/(tabs)/archives",
+        params: { openId: String(newId) },
+      });
     } catch (e: any) {
       Alert.alert("保存に失敗しました", String(e?.message ?? e));
     }
@@ -128,14 +134,17 @@ export default function EditRecordingScreen() {
       }
       clearDraft();
       if (isEditing) {
-        router.back();
+        router.navigate({
+          pathname: "/(tabs)/archives",
+          params: { openId: String(editId) },
+        });
         return;
       }
       router.navigate("/(tabs)");
     } catch (e: any) {
-      Alert.alert("削除に失敗しました", String(e?.message ?? e));
+      Alert.alert(String(e?.message ?? e));
     }
-  }, [draft, clearDraft, router, isEditing]);
+  }, [draft, clearDraft, router, editId, isEditing]);
 
   //ヘッダーボタン
   useLayoutEffect(() => {

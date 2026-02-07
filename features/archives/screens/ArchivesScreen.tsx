@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Animated,
   View,
@@ -12,13 +12,12 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { useFocusEffect } from "expo-router";
+import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { BlurView } from "expo-blur";
 
 import BottomSheet, {
-  BottomSheetView,
   BottomSheetBackdrop,
   BottomSheetScrollView,
   BottomSheetFooter,
@@ -41,6 +40,8 @@ export default function ArchivesScreen() {
   const bottomSheetRef = useRef<BottomSheet>(null);
   const searchInputRef = useRef<TextInput>(null);
   const scrollY = useRef(new Animated.Value(0)).current;
+  const { openId } = useLocalSearchParams<{ openId?: string }>();
+  const router = useRouter();
 
   const { top } = useSafeAreaInsets();
   const { height: windowHeight } = useWindowDimensions();
@@ -66,6 +67,27 @@ export default function ArchivesScreen() {
       loadRecordings();
     }, [loadRecordings]),
   );
+
+  //アクション後、対象のボトムシートを開く
+  useEffect(() => {
+    if (!openId) return;
+    let active = true;
+    (async () => {
+      await loadRecordings();
+      const record = await getRecordingRecordById(Number(openId));
+      if (!active) return;
+      if (record) {
+        setSelected(record);
+        requestAnimationFrame(() => {
+          bottomSheetRef.current?.snapToIndex(1);
+        });
+      }
+      router.setParams({ openId: undefined });
+    })();
+    return () => {
+      active = false;
+    };
+  }, [openId, loadRecordings, router]);
 
   //サーチフィルター
   const filteredRows = useMemo(() => {
@@ -208,69 +230,68 @@ export default function ArchivesScreen() {
             </BottomSheetFooter>
           )}
         >
-          <BottomSheetView style={styles.bsViewContainer}>
-            <BottomSheetScrollView contentContainerStyle={{ paddingBottom: footerHeight + 16 }}>
+          <BottomSheetScrollView
+            style={styles.bsScrollViewContainer}
+            contentContainerStyle={{ paddingBottom: footerHeight + 16 }}
+          >
+            <View
+              style={{
+                paddingVertical: 10,
+                paddingHorizontal: 20,
+                marginLeft: "auto",
+                alignItems: "center",
+              }}
+            >
+              <Pressable
+                style={({ pressed }: { pressed: boolean }) => [{ opacity: pressed ? 0.6 : 1 }]}
+                onPress={() =>
+                  showPopupMenu({
+                    id: selected?.id,
+                    audioUri: selected?.audio_uri,
+                    refresh: () => loadRecordings(),
+                    onBottomSheetClosed: () => {
+                      bottomSheetRef.current?.close();
+                    },
+                  })
+                }
+              >
+                <MaterialIcons name="more-horiz" size={30} color="#555555" />
+              </Pressable>
+            </View>
+            <View
+              style={{ paddingHorizontal: 36 }}
+              onLayout={(e) => setContentHeight(e.nativeEvent.layout.height)}
+            >
+              <Text style={styles.bsMeta}>Title : {selected?.recording_title ?? "Untitled"}</Text>
+              <Text style={styles.bsMeta}>
+                Duration : {formatSeconds(selected?.duration_ms ?? 0)}
+              </Text>
+              <Text style={styles.bsMeta}>
+                Time : {formatCreatedAtLocal(selected?.created_at ?? "null")}
+              </Text>
+              <Text style={styles.bsMeta}>
+                Location :{" "}
+                {selected?.lat == null || selected?.lng == null
+                  ? "null"
+                  : `${selected?.lat.toFixed(6)}, ${selected?.lng.toFixed(6)} (±${selected?.accuracy === null ? "?" : Math.floor(selected?.accuracy)} m)`}
+              </Text>
+              <Text style={styles.bsMemo}>- Memo -</Text>
+              <Text style={styles.bsMeta}>{selected?.memo}</Text>
+
               <View
-                style={{
-                  paddingVertical: 10,
-                  paddingHorizontal: 20,
-                  marginLeft: "auto",
-                  alignItems: "center",
+                onLayout={(e) => {
+                  const { y, height } = e.nativeEvent.layout;
+                  setWaveformBottom(y + height);
                 }}
               >
-                <Pressable
-                  style={({ pressed }: { pressed: boolean }) => [{ opacity: pressed ? 0.6 : 1 }]}
-                  onPress={() =>
-                    showPopupMenu({
-                      id: selected?.id,
-                      audioUri: selected?.audio_uri,
-                      title: selected?.recording_title,
-                      memo: selected?.memo,
-                      refresh: () => loadRecordings(),
-                      onBottomSheetClosed: () => {
-                        bottomSheetRef.current?.close();
-                      },
-                    })
-                  }
-                >
-                  <MaterialIcons name="more-horiz" size={30} color="#555555" />
-                </Pressable>
+                <StaticWaveform
+                  waveform={selected?.waveform_blob}
+                  waveformLength={selected?.waveform_length}
+                  waveformSampleIntervalMs={selected?.waveform_sample_interval_ms}
+                />
               </View>
-              <View
-                style={{ paddingHorizontal: 36 }}
-                onLayout={(e) => setContentHeight(e.nativeEvent.layout.height)}
-              >
-                <Text style={styles.bsMeta}>Title : {selected?.recording_title ?? "Untitled"}</Text>
-                <Text style={styles.bsMeta}>
-                  Duration : {formatSeconds(selected?.duration_ms ?? 0)}
-                </Text>
-                <Text style={styles.bsMeta}>
-                  Time : {formatCreatedAtLocal(selected?.created_at ?? "null")}
-                </Text>
-                <Text style={styles.bsMeta}>
-                  Location :{" "}
-                  {selected?.lat == null || selected?.lng == null
-                    ? "null"
-                    : `${selected?.lat.toFixed(6)}, ${selected?.lng.toFixed(6)} (±${selected?.accuracy === null ? "?" : Math.floor(selected?.accuracy)} m)`}
-                </Text>
-                <Text style={styles.bsMemo}>- Memo -</Text>
-                <Text style={styles.bsMeta}>{selected?.memo}</Text>
-
-                <View
-                  onLayout={(e) => {
-                    const { y, height } = e.nativeEvent.layout;
-                    setWaveformBottom(y + height);
-                  }}
-                >
-                  <StaticWaveform
-                    waveform={selected?.waveform_blob}
-                    waveformLength={selected?.waveform_length}
-                    waveformSampleIntervalMs={selected?.waveform_sample_interval_ms}
-                  />
-                </View>
-              </View>
-            </BottomSheetScrollView>
-          </BottomSheetView>
+            </View>
+          </BottomSheetScrollView>
         </BottomSheet>
       </GestureHandlerRootView>
     </View>
@@ -392,9 +413,8 @@ const styles = StyleSheet.create({
   bottomSheetBackground: {
     backgroundColor: "#B5B6B6",
   },
-  bsViewContainer: {
+  bsScrollViewContainer: {
     flex: 1,
-    // paddingHorizontal: 36,
     paddingBottom: 36,
   },
   bsMeta: {
