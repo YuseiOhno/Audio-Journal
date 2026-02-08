@@ -1,12 +1,14 @@
-import { forwardRef } from "react";
+import { forwardRef, useState, useMemo } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import MapView, { Marker } from "react-native-maps";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetFooter,
   BottomSheetScrollView,
 } from "@gorhom/bottom-sheet";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { formatCreatedAtLocal, formatSeconds } from "@/core/lib/format";
 import { RecordingRow } from "@/core/types/types";
@@ -23,6 +25,26 @@ const DetailSheet = forwardRef<BottomSheet, Props>(function DetailSheet(
   { selected, onOpenMenu },
   ref,
 ) {
+  const { top } = useSafeAreaInsets();
+  const [audioPlayerHeight, setAudioPlayerHeight] = useState(0);
+
+  const snapPoints = useMemo<(number | string)[]>(
+    () => [Math.max(1, audioPlayerHeight), "100%"],
+    [audioPlayerHeight],
+  );
+
+  const lat = selected?.lat;
+  const lng = selected?.lng;
+  const hasCoordinates = lat != null && lng != null;
+  const mapRegion = hasCoordinates
+    ? {
+        latitude: lat,
+        longitude: lng,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+      }
+    : null;
+
   const closeSheet = () => {
     if (ref && "current" in ref) {
       ref.current?.close();
@@ -34,7 +56,8 @@ const DetailSheet = forwardRef<BottomSheet, Props>(function DetailSheet(
       <BottomSheet
         ref={ref}
         index={-1}
-        snapPoints={["70%", "90%"]}
+        snapPoints={snapPoints}
+        topInset={top}
         enablePanDownToClose
         keyboardBehavior="interactive"
         keyboardBlurBehavior="restore"
@@ -44,7 +67,13 @@ const DetailSheet = forwardRef<BottomSheet, Props>(function DetailSheet(
         )}
         footerComponent={(props) => (
           <BottomSheetFooter {...props}>
-            <View style={styles.footerContainer}>
+            <View
+              onLayout={(e) => {
+                const h = Math.round(e.nativeEvent.layout.height);
+                setAudioPlayerHeight((prev) => (prev === h ? prev : h));
+              }}
+              style={styles.footerContainer}
+            >
               <AudioPlayer audioUri={selected?.audio_uri ?? ""} />
             </View>
           </BottomSheetFooter>
@@ -58,7 +87,10 @@ const DetailSheet = forwardRef<BottomSheet, Props>(function DetailSheet(
             <MaterialIcons name="more-horiz" size={30} color="#555555" />
           </Pressable>
         </View>
-        <BottomSheetScrollView style={styles.bsScrollViewContainer}>
+        <BottomSheetScrollView
+          style={styles.bsScrollViewContainer}
+          contentContainerStyle={{ paddingBottom: audioPlayerHeight }}
+        >
           <View style={styles.contentWrap}>
             <Text style={styles.bsMeta}>Title : {selected?.recording_title ?? "Untitled"}</Text>
             <Text style={styles.bsMeta}>
@@ -81,6 +113,19 @@ const DetailSheet = forwardRef<BottomSheet, Props>(function DetailSheet(
               />
             </View>
           </View>
+          {mapRegion ? (
+            <View style={styles.mapContainer}>
+              <MapView style={styles.map} region={mapRegion} mapType="mutedStandard">
+                <Marker
+                  coordinate={{ latitude: mapRegion.latitude, longitude: mapRegion.longitude }}
+                />
+              </MapView>
+            </View>
+          ) : (
+            <View style={styles.contentWrap}>
+              <Text style={styles.bsMeta}>Map : no location data</Text>
+            </View>
+          )}
         </BottomSheetScrollView>
       </BottomSheet>
     </GestureHandlerRootView>
@@ -108,7 +153,6 @@ const styles = StyleSheet.create({
   },
   bsScrollViewContainer: {
     flex: 1,
-    paddingBottom: 36,
   },
   moreButtonWrap: {
     paddingVertical: 10,
@@ -128,5 +172,14 @@ const styles = StyleSheet.create({
     marginTop: 16,
     fontSize: 14,
     color: "#555555",
+  },
+  mapContainer: {
+    marginTop: 16,
+    width: "100%",
+    overflow: "hidden",
+  },
+  map: {
+    width: "100%",
+    height: 220,
   },
 });
