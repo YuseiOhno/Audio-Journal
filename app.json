@@ -12,7 +12,8 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.yuseiohno.musann",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "CFBundleLocalizations": ["ja", "en"]
       }
     },
     "android": {

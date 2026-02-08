@@ -9,16 +9,18 @@ type Props = {
   searchBarMargin: number;
   query: string;
   onQueryChange: (value: string) => void;
+  onPressSort: () => void;
   inputRef: RefObject<TextInput | null>;
   headerOpacity: Animated.AnimatedInterpolation<number>;
 };
 
-export default function ArchivesSearchBar({
+export default function SearchBar({
   topInset,
   searchBarHeight,
   searchBarMargin,
   query,
   onQueryChange,
+  onPressSort,
   inputRef,
   headerOpacity,
 }: Props) {
@@ -47,6 +49,7 @@ export default function ArchivesSearchBar({
         />
       </View>
       <TouchableOpacity
+        onPress={onPressSort}
         style={[styles.sortButton, { height: searchBarHeight, width: searchBarHeight }]}
       >
         <Ionicons name="funnel-outline" size={18} color="#666666" />

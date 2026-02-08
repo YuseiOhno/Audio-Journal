@@ -1,4 +1,5 @@
 import { Stack } from "expo-router";
+import { setAudioModeAsync } from "expo-audio";
 import { useState, useEffect } from "react";
 import { initDB } from "@/core/db";
 import { TamaguiProvider } from "@tamagui/core";
@@ -11,6 +12,10 @@ export default function RootLayout() {
   useEffect(() => {
     (async () => {
       await initDB();
+      await setAudioModeAsync({
+        allowsRecording: false,
+        playsInSilentMode: true,
+      });
       setReady(true);
     })();
   }, []);

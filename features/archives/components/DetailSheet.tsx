@@ -1,5 +1,5 @@
-import { forwardRef, useEffect, useMemo, useState } from "react";
-import { useWindowDimensions, Pressable, StyleSheet, Text, View } from "react-native";
+import { forwardRef } from "react";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import BottomSheet, {
@@ -19,27 +19,10 @@ type Props = {
   onOpenMenu: (closeSheet: () => void) => void;
 };
 
-const ArchiveDetailSheet = forwardRef<BottomSheet, Props>(function ArchiveDetailSheet(
+const DetailSheet = forwardRef<BottomSheet, Props>(function DetailSheet(
   { selected, onOpenMenu },
   ref,
 ) {
-  const [contentHeight, setContentHeight] = useState(1);
-  const [waveformBottom, setWaveformBottom] = useState<number | null>(null);
-  const [footerHeight, setFooterHeight] = useState(0);
-  const { height: windowHeight } = useWindowDimensions();
-
-  useEffect(() => {
-    setContentHeight(1);
-    setWaveformBottom(null);
-  }, [selected?.id]);
-
-  const snapPoints = useMemo(() => {
-    const maxSnap = Math.max(1, Math.floor(windowHeight * 0.9));
-    const waveformSnap = waveformBottom == null ? contentHeight : waveformBottom + footerHeight;
-    const clampedWaveformSnap = Math.max(1, Math.min(waveformSnap, maxSnap));
-    return [clampedWaveformSnap, "90%"];
-  }, [contentHeight, footerHeight, waveformBottom, windowHeight]);
-
   const closeSheet = () => {
     if (ref && "current" in ref) {
       ref.current?.close();
@@ -51,18 +34,17 @@ const ArchiveDetailSheet = forwardRef<BottomSheet, Props>(function ArchiveDetail
       <BottomSheet
         ref={ref}
         index={-1}
-        snapPoints={snapPoints}
+        snapPoints={["70%", "90%"]}
         enablePanDownToClose
         keyboardBehavior="interactive"
         keyboardBlurBehavior="restore"
         backgroundStyle={styles.bottomSheetBackground}
-        backdropComponent={(props) => <BottomSheetBackdrop {...props} pressBehavior="close" opacity={0.3} />}
+        backdropComponent={(props) => (
+          <BottomSheetBackdrop {...props} pressBehavior="close" opacity={0.3} />
+        )}
         footerComponent={(props) => (
           <BottomSheetFooter {...props}>
-            <View
-              onLayout={(e) => setFooterHeight(e.nativeEvent.layout.height)}
-              style={styles.footerContainer}
-            >
+            <View style={styles.footerContainer}>
               <AudioPlayer audioUri={selected?.audio_uri ?? ""} />
             </View>
           </BottomSheetFooter>
@@ -76,26 +58,22 @@ const ArchiveDetailSheet = forwardRef<BottomSheet, Props>(function ArchiveDetail
             <MaterialIcons name="more-horiz" size={30} color="#555555" />
           </Pressable>
         </View>
-        <BottomSheetScrollView
-          style={styles.bsScrollViewContainer}
-          contentContainerStyle={{ paddingBottom: footerHeight + 16 }}
-        >
-          <View style={styles.contentWrap} onLayout={(e) => setContentHeight(e.nativeEvent.layout.height)}>
+        <BottomSheetScrollView style={styles.bsScrollViewContainer}>
+          <View style={styles.contentWrap}>
             <Text style={styles.bsMeta}>Title : {selected?.recording_title ?? "Untitled"}</Text>
-            <Text style={styles.bsMeta}>Duration : {formatSeconds(selected?.duration_ms ?? 0)}</Text>
-            <Text style={styles.bsMeta}>Time : {formatCreatedAtLocal(selected?.created_at ?? "null")}</Text>
+            <Text style={styles.bsMeta}>
+              Duration : {formatSeconds(selected?.duration_ms ?? 0)}
+            </Text>
+            <Text style={styles.bsMeta}>
+              Time : {formatCreatedAtLocal(selected?.created_at ?? "null")}
+            </Text>
             <Text style={styles.bsMeta}>
               Location : {formatLocationText(selected?.lat, selected?.lng, selected?.accuracy)}
             </Text>
             <Text style={styles.bsMemo}>- Memo -</Text>
             <Text style={styles.bsMeta}>{selected?.memo}</Text>
 
-            <View
-              onLayout={(e) => {
-                const { y, height } = e.nativeEvent.layout;
-                setWaveformBottom(y + height);
-              }}
-            >
+            <View>
               <StaticWaveform
                 waveform={selected?.waveform_blob}
                 waveformLength={selected?.waveform_length}
@@ -109,7 +87,7 @@ const ArchiveDetailSheet = forwardRef<BottomSheet, Props>(function ArchiveDetail
   );
 });
 
-export default ArchiveDetailSheet;
+export default DetailSheet;
 
 const styles = StyleSheet.create({
   bottomSheetContainer: {

@@ -8,7 +8,7 @@ type Props = {
   onPress: (item: RecordingRow) => void;
 };
 
-export default function ArchiveRowCard({ item, onPress }: Props) {
+export default function RowCard({ item, onPress }: Props) {
   const { year, monthDay } = getDateParts(item.date_key);
 
   return (

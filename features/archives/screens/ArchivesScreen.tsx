@@ -6,13 +6,15 @@ import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 
 import { getRecordingRecordById, getRecordings } from "@/core/db/repositories/recordings";
 import { RecordingRow } from "@/core/types/types";
-import ArchiveDetailSheet from "../components/DetailSheet";
-import ArchiveRowCard from "@/features/archives/components/RowCard";
-import ArchivesSearchBar from "@/features/archives/components/SearchBar";
+import DetailSheet from "../components/DetailSheet";
+import RowCard from "@/features/archives/components/RowCard";
+import SearchBar from "@/features/archives/components/SearchBar";
 import usePopupMenu from "../hooks/usePopupMenu";
+import useSortMenu, { SortKey } from "../hooks/useSortMenu";
 
 export default function ArchivesScreen() {
   const [query, setQuery] = useState("");
+  const [sortKey, setSortKey] = useState<SortKey>("newest");
   const [rows, setRows] = useState<RecordingRow[]>([]);
   const [selected, setSelected] = useState<RecordingRow>();
   const bottomSheetRef = useRef<BottomSheet>(null);
@@ -26,6 +28,7 @@ export default function ArchivesScreen() {
   const searchBarMargin = 20;
 
   const showPopupMenu = usePopupMenu();
+  const showSortMenu = useSortMenu();
 
   // フォーカスのたびリフレッシュ
   const loadRecordings = useCallback(async () => {
@@ -74,6 +77,24 @@ export default function ArchivesScreen() {
     });
   }, [query, rows]);
 
+  //ソート処理
+  const sortedRows = useMemo(() => {
+    const sorted = [...filteredRows];
+    switch (sortKey) {
+      case "newest":
+        return sorted.sort((a, b) => b.created_at.localeCompare(a.created_at));
+      case "oldest":
+        return sorted.sort((a, b) => a.created_at.localeCompare(b.created_at));
+      case "titleAsc":
+        return sorted.sort((a, b) => a.recording_title.localeCompare(b.recording_title));
+      case "titleDesc":
+        return sorted.sort((a, b) => b.recording_title.localeCompare(a.recording_title));
+      default:
+        return sorted;
+    }
+  }, [filteredRows, sortKey]);
+
+  //ボトムシートの表示
   const onPressRow = useCallback(async (id: number) => {
     if (searchInputRef.current?.isFocused()) {
       searchInputRef.current.blur();
@@ -86,6 +107,7 @@ export default function ArchivesScreen() {
     });
   }, []);
 
+  //詳細画面からポップアップメニューを表示
   const onOpenMenu = useCallback(
     (closeSheet: () => void) => {
       showPopupMenu({
@@ -104,20 +126,29 @@ export default function ArchivesScreen() {
     extrapolate: "clamp",
   });
 
+  //ソートハンドラー
+  const onPressSort = useCallback(() => {
+    showSortMenu({
+      current: sortKey,
+      onSelect: setSortKey,
+    });
+  }, [showSortMenu, sortKey]);
+
   return (
     <View style={styles.container}>
-      <ArchivesSearchBar
+      <SearchBar
         topInset={top}
         searchBarHeight={searchBarHeight}
         searchBarMargin={searchBarMargin}
         query={query}
         onQueryChange={setQuery}
+        onPressSort={onPressSort}
         inputRef={searchInputRef}
         headerOpacity={headerOpacity}
       />
 
       <Animated.FlatList
-        data={filteredRows}
+        data={sortedRows}
         keyExtractor={(item) => String(item.id)}
         contentContainerStyle={[
           styles.listContent,
@@ -127,9 +158,7 @@ export default function ArchivesScreen() {
           useNativeDriver: false,
         })}
         scrollEventThrottle={16}
-        renderItem={({ item }) => (
-          <ArchiveRowCard item={item} onPress={(row) => onPressRow(row.id)} />
-        )}
+        renderItem={({ item }) => <RowCard item={item} onPress={(row) => onPressRow(row.id)} />}
         ListEmptyComponent={
           <View style={styles.emptyState}>
             <Text style={styles.emptyText}>no record</Text>
@@ -137,7 +166,7 @@ export default function ArchivesScreen() {
         }
       />
 
-      <ArchiveDetailSheet ref={bottomSheetRef} selected={selected} onOpenMenu={onOpenMenu} />
+      <DetailSheet ref={bottomSheetRef} selected={selected} onOpenMenu={onOpenMenu} />
     </View>
   );
 }
