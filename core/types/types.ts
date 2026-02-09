@@ -12,7 +12,6 @@ export type RecordingDraft = {
   location: GeoPoint | null;
   memo: string;
   waveform: number[];
-  waveformSampleIntervalMs: number;
   recording_title: string;
 };
 
@@ -28,6 +27,5 @@ export type RecordingRow = {
   memo: string;
   waveform_blob: number[];
   waveform_length: number;
-  waveform_sample_interval_ms: number;
   recording_title: string;
 };

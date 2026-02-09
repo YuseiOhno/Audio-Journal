@@ -76,7 +76,6 @@ export default function EditRecordingScreen() {
             : { lat: record.lat, lng: record.lng, accuracy: record.accuracy ?? null },
         memo: record.memo ?? "",
         waveform: record.waveform_blob ?? [],
-        waveformSampleIntervalMs: record.waveform_sample_interval_ms,
         recording_title: record.recording_title ?? "",
       });
     })();

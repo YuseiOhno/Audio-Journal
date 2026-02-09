@@ -1,27 +1,25 @@
 import { useMemo, useState } from "react";
 import { View, Text, StyleSheet } from "react-native";
+import { calcWaveformLayout } from "@/core/lib/waveformLayout";
+import {
+  STATIC_WAVEFORM_TARGET_BARS,
+  WAVEFORM_BAR_GAP,
+  WAVEFORM_BORDER_WIDTH,
+  WAVEFORM_DISPLAY_SCALE,
+  WAVEFORM_HORIZONTAL_PADDING,
+} from "@/core/lib/waveformConstants";
 
 type StaticWaveformProps = {
   waveform: number[] | null | undefined;
   waveformLength: number | null | undefined;
-  waveformSampleIntervalMs: number | null | undefined;
 };
 
-export default function StaticWaveform({
-  waveform,
-  waveformLength,
-  waveformSampleIntervalMs,
-}: StaticWaveformProps) {
+export default function StaticWaveform({ waveform, waveformLength }: StaticWaveformProps) {
   const [containerWidth, setContainerWidth] = useState(0);
-  const barGap = 1;
-  const borderWidth = 0;
-  const displayScale = 60;
-  const maxMs = 30000;
-  const targetBars = useMemo(() => {
-    const interval =
-      waveformSampleIntervalMs && waveformSampleIntervalMs > 0 ? waveformSampleIntervalMs : 200;
-    return Math.ceil(maxMs / interval);
-  }, [waveformSampleIntervalMs]);
+  const barGap = WAVEFORM_BAR_GAP;
+  const borderWidth = WAVEFORM_BORDER_WIDTH;
+  const displayScale = WAVEFORM_DISPLAY_SCALE;
+  const targetBars = STATIC_WAVEFORM_TARGET_BARS;
 
   const limitedWaveform = useMemo(() => {
     if (!waveform || waveform.length === 0) return [];
@@ -30,22 +28,21 @@ export default function StaticWaveform({
     return waveform.slice(0, maxBars);
   }, [waveform, waveformLength, targetBars]);
 
-  const { fitBarWidth, fitGap } = useMemo(() => {
-    if (containerWidth <= 0) {
-      return { fitBarWidth: 1, fitGap: 0 };
-    }
-    const innerWidth = Math.max(0, containerWidth - borderWidth * 2 - 10 * 2);
-    let gap = barGap;
-    let width = (innerWidth - gap * (targetBars - 1)) / targetBars;
-    if (width <= 0) {
-      gap = 0;
-      width = innerWidth / targetBars;
-    }
-    return { fitBarWidth: width, fitGap: gap };
-  }, [containerWidth, barGap, borderWidth, targetBars]);
+  //波形バー、隙間の幅を計算
+  const { fitBarWidth, fitGap } = useMemo(
+    () =>
+      calcWaveformLayout({
+        containerWidth,
+        targetBars,
+        paddingHorizontal: WAVEFORM_HORIZONTAL_PADDING,
+        borderWidth,
+        barGap,
+      }),
+    [containerWidth, targetBars, borderWidth, barGap],
+  );
 
   if (!limitedWaveform || limitedWaveform.length === 0) {
-    return <Text style={styles.empty}>waveform</Text>;
+    return <Text style={styles.empty}>null</Text>;
   }
 
   return (
@@ -56,10 +53,7 @@ export default function StaticWaveform({
       {limitedWaveform.map((value, index) => (
         <View
           key={index}
-          style={[
-            styles.bar,
-            { height: Math.max(1, value * displayScale * 2), width: fitBarWidth },
-          ]}
+          style={[styles.bar, { height: Math.max(1, value * displayScale), width: fitBarWidth }]}
         />
       ))}
     </View>

@@ -1,5 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { View, StyleSheet } from "react-native";
+import { calcWaveformLayout } from "@/core/lib/waveformLayout";
+import {
+  WAVEFORM_BAR_GAP,
+  WAVEFORM_BORDER_WIDTH,
+  WAVEFORM_DISPLAY_SCALE,
+  WAVEFORM_HORIZONTAL_PADDING,
+} from "@/core/lib/waveformConstants";
 
 type Props = {
   recordingInProgress: boolean;
@@ -18,26 +25,24 @@ export default function WaveformDisplay({
 }: Props) {
   const [waveformHeights, setWaveformHeights] = useState<number[]>([]);
   const [containerWidth, setContainerWidth] = useState(0);
-  const barGap = 1;
-  const borderWidth = 1;
-  const displayScale = 60;
+  const barGap = WAVEFORM_BAR_GAP;
+  const borderWidth = WAVEFORM_BORDER_WIDTH;
+  const displayScale = WAVEFORM_DISPLAY_SCALE;
   const targetBars = Math.ceil(maxMs / sampleIntervalMs);
+  const horizontalPadding = WAVEFORM_HORIZONTAL_PADDING;
 
-  //波形バー、隙間の幅を調整
-  const { fitBarWidth, fitGap } = useMemo(() => {
-    if (containerWidth <= 0) return { fitBarWidth: 1, fitGap: 0 };
-    const innerWidth = Math.max(
-      0,
-      containerWidth - borderWidth * 2 - styles.container.paddingHorizontal * 2,
-    );
-    let gap = barGap;
-    let width = (innerWidth - gap * (targetBars - 1)) / targetBars;
-    if (width <= 0) {
-      gap = 0;
-      width = innerWidth / targetBars;
-    }
-    return { fitBarWidth: width, fitGap: gap };
-  }, [containerWidth, barGap, targetBars, borderWidth]);
+  //波形バー、隙間の幅を計算
+  const { fitBarWidth, fitGap } = useMemo(
+    () =>
+      calcWaveformLayout({
+        containerWidth,
+        targetBars,
+        paddingHorizontal: horizontalPadding,
+        borderWidth,
+        barGap,
+      }),
+    [containerWidth, targetBars, horizontalPadding, borderWidth, barGap],
+  );
 
   useEffect(() => {
     if (!recordingInProgress) return;
@@ -47,18 +52,23 @@ export default function WaveformDisplay({
       if (latestDecibel.current != null) {
         const normalized = Math.max(0, Math.min(1, (latestDecibel.current + 60) / 60));
         const shaped = Math.pow(normalized, 1.4);
-        const normalizedRounded = Math.round(shaped * 100) / 100;
-        const displayHeight = Math.round(normalizedRounded * displayScale * 100) / 100;
 
-        waveformBufferRef.current.push(normalizedRounded);
+        waveformBufferRef.current.push(shaped);
         if (waveformBufferRef.current.length <= targetBars) {
-          setWaveformHeights((prev) => [...prev, displayHeight]);
+          setWaveformHeights((prev) => [...prev, shaped * displayScale]);
         }
       }
     }, sampleIntervalMs);
 
     return () => clearInterval(interval);
-  }, [recordingInProgress, latestDecibel, targetBars, waveformBufferRef, sampleIntervalMs]);
+  }, [
+    recordingInProgress,
+    latestDecibel,
+    targetBars,
+    waveformBufferRef,
+    sampleIntervalMs,
+    displayScale,
+  ]);
 
   return (
     <View
@@ -66,7 +76,7 @@ export default function WaveformDisplay({
       onLayout={(e) => setContainerWidth(e.nativeEvent.layout.width)}
     >
       {waveformHeights.map((height, index) => (
-        <View key={index} style={[styles.waveForm, { height: height * 2, width: fitBarWidth }]} />
+        <View key={index} style={[styles.waveForm, { height: height, width: fitBarWidth }]} />
       ))}
     </View>
   );

@@ -18,9 +18,8 @@ export async function insertRecording(data: RecordingDraft) {
       memo,
       waveform_blob,
       waveform_length,
-      waveform_sample_interval_ms,
       recording_title
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `,
     [
       data.dateKey,
@@ -33,7 +32,6 @@ export async function insertRecording(data: RecordingDraft) {
       data.memo,
       waveformBlob,
       data.waveform.length,
-      data.waveformSampleIntervalMs,
       data.recording_title,
     ],
   );

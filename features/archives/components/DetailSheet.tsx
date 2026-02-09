@@ -109,7 +109,6 @@ const DetailSheet = forwardRef<BottomSheet, Props>(function DetailSheet(
               <StaticWaveform
                 waveform={selected?.waveform_blob}
                 waveformLength={selected?.waveform_length}
-                waveformSampleIntervalMs={selected?.waveform_sample_interval_ms}
               />
             </View>
           </View>

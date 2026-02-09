@@ -66,7 +66,6 @@ export default function RecordingScreen() {
         location,
         memo: "",
         waveform: waveformBufferRef.current,
-        waveformSampleIntervalMs: sampleIntervalMs,
         recording_title: "",
       });
       waveformBufferRef.current = [];
@@ -74,7 +73,7 @@ export default function RecordingScreen() {
 
       router.push("/edit");
     },
-    [createdAt, dateKey, location, router, sampleIntervalMs, setDraft, resetRecording],
+    [createdAt, dateKey, location, router, setDraft, resetRecording],
   );
 
   //30秒タイマー、handleStop実行
