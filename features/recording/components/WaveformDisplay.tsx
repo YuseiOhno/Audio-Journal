@@ -7,6 +7,7 @@ import {
   WAVEFORM_DISPLAY_SCALE,
   WAVEFORM_HORIZONTAL_PADDING,
 } from "@/core/lib/waveformConstants";
+import { normalizeDb } from "../lib/waveformMath";
 
 type Props = {
   recordingInProgress: boolean;
@@ -29,7 +30,7 @@ export default function WaveformDisplay({
   const borderWidth = WAVEFORM_BORDER_WIDTH;
   const displayScale = WAVEFORM_DISPLAY_SCALE;
   const targetBars = Math.ceil(maxMs / sampleIntervalMs);
-  const horizontalPadding = WAVEFORM_HORIZONTAL_PADDING;
+  const paddingHorizontal = WAVEFORM_HORIZONTAL_PADDING;
 
   //波形バー、隙間の幅を計算
   const { fitBarWidth, fitGap } = useMemo(
@@ -37,25 +38,25 @@ export default function WaveformDisplay({
       calcWaveformLayout({
         containerWidth,
         targetBars,
-        paddingHorizontal: horizontalPadding,
+        paddingHorizontal,
         borderWidth,
         barGap,
       }),
-    [containerWidth, targetBars, horizontalPadding, borderWidth, barGap],
+    [containerWidth, targetBars, paddingHorizontal, borderWidth, barGap],
   );
 
+  // DB保存用にバッファー、UI用にStateへ
   useEffect(() => {
     if (!recordingInProgress) return;
     setWaveformHeights([]);
 
     const interval = setInterval(() => {
       if (latestDecibel.current != null) {
-        const normalized = Math.max(0, Math.min(1, (latestDecibel.current + 60) / 60));
-        const shaped = Math.pow(normalized, 1.4);
+        const normalizedDecibel = normalizeDb(latestDecibel.current);
 
-        waveformBufferRef.current.push(shaped);
+        waveformBufferRef.current.push(normalizedDecibel);
         if (waveformBufferRef.current.length <= targetBars) {
-          setWaveformHeights((prev) => [...prev, shaped * displayScale]);
+          setWaveformHeights((prev) => [...prev, normalizedDecibel * displayScale]);
         }
       }
     }, sampleIntervalMs);

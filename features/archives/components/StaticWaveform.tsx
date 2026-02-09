@@ -20,6 +20,7 @@ export default function StaticWaveform({ waveform, waveformLength }: StaticWavef
   const borderWidth = WAVEFORM_BORDER_WIDTH;
   const displayScale = WAVEFORM_DISPLAY_SCALE;
   const targetBars = STATIC_WAVEFORM_TARGET_BARS;
+  const paddingHorizontal = WAVEFORM_HORIZONTAL_PADDING;
 
   const limitedWaveform = useMemo(() => {
     if (!waveform || waveform.length === 0) return [];
@@ -34,11 +35,11 @@ export default function StaticWaveform({ waveform, waveformLength }: StaticWavef
       calcWaveformLayout({
         containerWidth,
         targetBars,
-        paddingHorizontal: WAVEFORM_HORIZONTAL_PADDING,
+        paddingHorizontal,
         borderWidth,
         barGap,
       }),
-    [containerWidth, targetBars, borderWidth, barGap],
+    [containerWidth, targetBars, paddingHorizontal, borderWidth, barGap],
   );
 
   if (!limitedWaveform || limitedWaveform.length === 0) {

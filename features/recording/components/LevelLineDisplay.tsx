@@ -10,15 +10,12 @@ import {
 import { Canvas, Path, usePathValue } from "@shopify/react-native-skia";
 import type { SkPath } from "@shopify/react-native-skia";
 
+import { normalizeDb } from "../lib/waveformMath";
+
 type Props = {
   recordingInProgress: boolean;
   latestDecibel: React.RefObject<number | null>;
 };
-
-const DB_FLOOR = -60;
-const DB_CEIL = 0;
-
-const clamp01 = (n: number) => Math.max(0, Math.min(1, n));
 
 const updateWavePath = (
   path: SkPath,
@@ -70,19 +67,14 @@ export default function LevelLineDisplay({ recordingInProgress, latestDecibel }:
     );
 
     const interval = setInterval(() => {
-      const db = latestDecibel.current;
-      if (db == null) return;
+      if (latestDecibel.current != null) {
+        const normalizedDecibel = normalizeDb(latestDecibel.current);
 
-      const normalized = clamp01((db - DB_FLOOR) / (DB_CEIL - DB_FLOOR));
+        const targetAmp = 4 + normalizedDecibel * 18; // 4..22px くらい
 
-      // 2) 音量 → 振幅（px）
-      //    小さい音も見えるようにカーブ（**2 など）をかけると気持ちいい
-      const curved = Math.pow(normalized, 1.7);
-
-      const targetAmp = 4 + curved * 18; // 4..22px くらい
-
-      // 3) 振幅はヌルっと追従（ガタつき防止）
-      amp.value = withTiming(targetAmp, { duration: 120, easing: Easing.out(Easing.cubic) });
+        // 3) 振幅はヌルっと追従（ガタつき防止）
+        amp.value = withTiming(targetAmp, { duration: 120, easing: Easing.out(Easing.cubic) });
+      }
     }, 120);
 
     return () => clearInterval(interval);
