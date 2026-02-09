@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Animated, Keyboard, StyleSheet, Text, TextInput, View } from "react-native";
 import BottomSheet from "@gorhom/bottom-sheet";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -11,6 +11,7 @@ import RowCard from "@/features/archives/components/RowCard";
 import SearchBar from "@/features/archives/components/SearchBar";
 import usePopupMenu from "../hooks/usePopupMenu";
 import useSortMenu, { SortKey } from "../hooks/useSortMenu";
+import useFilteredAndSortedRecordings from "../hooks/useFilteredAndSortedRecordings";
 
 export default function ArchivesScreen() {
   const [query, setQuery] = useState("");
@@ -29,6 +30,7 @@ export default function ArchivesScreen() {
 
   const showPopupMenu = usePopupMenu();
   const showSortMenu = useSortMenu();
+  const { sortedRows } = useFilteredAndSortedRecordings({ rows, query, sortKey });
 
   // フォーカスのたびリフレッシュ
   const loadRecordings = useCallback(async () => {
@@ -62,37 +64,6 @@ export default function ArchivesScreen() {
       active = false;
     };
   }, [openId, loadRecordings, router]);
-
-  // サーチフィルター
-  const filteredRows = useMemo(() => {
-    const trimmed = query.trim().toLowerCase();
-    if (!trimmed) return rows;
-    return rows.filter((row) => {
-      return (
-        String(row.id).includes(trimmed) ||
-        row.date_key.toLowerCase().includes(trimmed) ||
-        row.recording_title?.toLowerCase().includes(trimmed) ||
-        row.memo?.toLowerCase().includes(trimmed)
-      );
-    });
-  }, [query, rows]);
-
-  //ソート処理
-  const sortedRows = useMemo(() => {
-    const sorted = [...filteredRows];
-    switch (sortKey) {
-      case "newest":
-        return sorted.sort((a, b) => b.created_at.localeCompare(a.created_at));
-      case "oldest":
-        return sorted.sort((a, b) => a.created_at.localeCompare(b.created_at));
-      case "titleAsc":
-        return sorted.sort((a, b) => a.recording_title.localeCompare(b.recording_title));
-      case "titleDesc":
-        return sorted.sort((a, b) => b.recording_title.localeCompare(a.recording_title));
-      default:
-        return sorted;
-    }
-  }, [filteredRows, sortKey]);
 
   //ボトムシートの表示
   const onPressRow = useCallback(async (id: number) => {
