@@ -24,7 +24,7 @@ export default function WaveformDisplay({
   sampleIntervalMs,
   waveformBufferRef,
 }: Props) {
-  const [waveformHeights, setWaveformHeights] = useState<number[]>([]);
+  const [waveformValues, setWaveformValues] = useState<number[]>([]);
   const [containerWidth, setContainerWidth] = useState(0);
   const barGap = WAVEFORM_BAR_GAP;
   const borderWidth = WAVEFORM_BORDER_WIDTH;
@@ -48,7 +48,7 @@ export default function WaveformDisplay({
   // DB保存用にバッファー、UI用にStateへ
   useEffect(() => {
     if (!recordingInProgress) return;
-    setWaveformHeights([]);
+    setWaveformValues([]);
 
     const interval = setInterval(() => {
       if (latestDecibel.current != null) {
@@ -56,28 +56,24 @@ export default function WaveformDisplay({
 
         waveformBufferRef.current.push(normalizedDecibel);
         if (waveformBufferRef.current.length <= targetBars) {
-          setWaveformHeights((prev) => [...prev, normalizedDecibel * displayScale]);
+          setWaveformValues((prev) => [...prev, normalizedDecibel]);
         }
       }
     }, sampleIntervalMs);
 
     return () => clearInterval(interval);
-  }, [
-    recordingInProgress,
-    latestDecibel,
-    targetBars,
-    waveformBufferRef,
-    sampleIntervalMs,
-    displayScale,
-  ]);
+  }, [recordingInProgress, latestDecibel, targetBars, waveformBufferRef, sampleIntervalMs]);
 
   return (
     <View
       style={[styles.container, { gap: fitGap, borderWidth }]}
       onLayout={(e) => setContainerWidth(e.nativeEvent.layout.width)}
     >
-      {waveformHeights.map((height, index) => (
-        <View key={index} style={[styles.waveForm, { height: height, width: fitBarWidth }]} />
+      {waveformValues.map((height, index) => (
+        <View
+          key={index}
+          style={[styles.waveForm, { height: height * displayScale, width: fitBarWidth }]}
+        />
       ))}
     </View>
   );

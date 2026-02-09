@@ -72,7 +72,7 @@ export default function ArchivesScreen() {
       Keyboard.dismiss();
     }
     const record = await getRecordingRecordById(id);
-    setSelected(record);
+    setSelected(record ?? undefined);
     requestAnimationFrame(() => {
       bottomSheetRef.current?.snapToIndex(1);
     });

@@ -11,7 +11,7 @@ import {
 
 import { useRecordingDraftStore } from "../store/recordingDraftStore";
 import {
-  getRecordingRecordById,
+  getRecordingDraftById,
   insertRecording,
   updateRecordingTitleMemoById,
 } from "@/core/db/repositories/recordings";
@@ -57,34 +57,24 @@ export default function EditRecordingScreen() {
   useEffect(() => {
     if (!isEditing || editId == null) return;
     let active = true;
+
     (async () => {
-      const record = await getRecordingRecordById(editId);
+      const record = await getRecordingDraftById(editId);
       if (!active) return;
+
       if (!record) {
         Alert.alert("録音が見つかりませんでした");
         router.back();
         return;
       }
-      setDraft({
-        dateKey: record.date_key,
-        createdAt: record.created_at,
-        audioUri: record.audio_uri,
-        durationMs: record.duration_ms,
-        location:
-          record.lat == null || record.lng == null
-            ? null
-            : { lat: record.lat, lng: record.lng, accuracy: record.accuracy ?? null },
-        memo: record.memo ?? "",
-        waveform: record.waveform_blob ?? [],
-        recording_title: record.recording_title ?? "",
-      });
+      setDraft(record);
     })();
     return () => {
       active = false;
     };
   }, [isEditing, editId, router, setDraft]);
 
-  //DBインサート、アップデート
+  //DBインサートorアップデート
   const onSave = useCallback(async () => {
     if (!draft) return;
 

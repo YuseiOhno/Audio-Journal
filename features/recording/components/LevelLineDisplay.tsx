@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { View, StyleSheet } from "react-native";
 import {
   Easing,
@@ -42,7 +42,7 @@ const updateWavePath = (
 };
 
 export default function LevelLineDisplay({ recordingInProgress, latestDecibel }: Props) {
-  const W = 320; // まず固定でOK（あとで onLayout で可変にできる）
+  const [containerWidth, setContainerWidth] = useState(0);
   const H = 120;
   const yMid = H / 2;
 
@@ -83,12 +83,15 @@ export default function LevelLineDisplay({ recordingInProgress, latestDecibel }:
   // 4) phase/amp から Path を生成（Skiaに渡す）
   const animatedPath = usePathValue((path) => {
     "worklet";
-    updateWavePath(path, W, yMid, amp.value, phase.value, 2.2, 90);
+    updateWavePath(path, containerWidth, yMid, amp.value, phase.value, 2.2, 90);
   });
 
   return (
-    <View style={[styles.container, { width: "100%", height: H }]}>
-      <Canvas style={{ width: W, height: H }}>
+    <View
+      style={[styles.container, { width: "100%", height: H }]}
+      onLayout={(e) => setContainerWidth(e.nativeEvent.layout.width)}
+    >
+      <Canvas style={{ width: containerWidth, height: H }}>
         <Path
           path={animatedPath}
           color="#333333"
