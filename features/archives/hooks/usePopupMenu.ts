@@ -1,9 +1,8 @@
 import { deleteRecordingRecordById } from "@/core/db/repositories/recordings";
 import { useActionSheet } from "@expo/react-native-action-sheet";
 import { useRouter } from "expo-router";
-import { File } from "expo-file-system";
 import { Alert } from "react-native";
-import { shareFile } from "./useFileSharing";
+import { shareFile, removeIfExists } from "@/core/lib/recordingFileService";
 
 type Props = {
   id?: number;
@@ -33,8 +32,7 @@ export default function usePopupMenu() {
       if (id == null) return;
       try {
         if (audioUri) {
-          const file = new File(audioUri);
-          file.delete();
+          await removeIfExists(audioUri);
         }
         const ok = await deleteRecordingRecordById(id);
         if (ok) {
@@ -51,7 +49,15 @@ export default function usePopupMenu() {
 
     //ファイル共有
     const handleShareFile = async (audioUri?: string) => {
-      if (audioUri) await shareFile(audioUri);
+      if (!audioUri) return;
+      const result = await shareFile(audioUri);
+      if (!result.ok) {
+        if (result.reason === "UNAVAILABLE") {
+          Alert.alert("このデバイスでは共有機能を利用できません");
+        } else {
+          Alert.alert("共有中にエラーが発生しました", result.message ?? "不明なエラー");
+        }
+      }
     };
 
     showActionSheetWithOptions(

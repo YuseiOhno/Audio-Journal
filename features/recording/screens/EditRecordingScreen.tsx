@@ -17,8 +17,7 @@ import {
 } from "@/core/db/repositories/recordings";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { moveRecordingToDocuments } from "../lib/moveRecordingToDocuments";
-import { File } from "expo-file-system";
+import { moveRecordingToDocuments, removeIfExists } from "../../../core/lib/recordingFileService";
 
 export default function EditRecordingScreen() {
   const draft = useRecordingDraftStore((s) => s.draft);
@@ -118,8 +117,7 @@ export default function EditRecordingScreen() {
   const onCancel = useCallback(async () => {
     try {
       if (!isEditing && draft?.audioUri) {
-        const file = new File(draft.audioUri);
-        file.delete();
+        await removeIfExists(draft.audioUri);
       }
       clearDraft();
       if (isEditing) {
