@@ -10,7 +10,8 @@ import DetailSheet from "../components/DetailSheet";
 import RowCard from "@/features/archives/components/RowCard";
 import SearchBar from "@/features/archives/components/SearchBar";
 import usePopupMenu from "../hooks/usePopupMenu";
-import useSortMenu, { SortKey } from "../hooks/useSortMenu";
+import useSortMenu from "../hooks/useSortMenu";
+import type { SortKey } from "@/features/archives/lib/sort";
 import useFilteredAndSortedRecordings from "../hooks/useFilteredAndSortedRecordings";
 
 export default function ArchivesScreen() {

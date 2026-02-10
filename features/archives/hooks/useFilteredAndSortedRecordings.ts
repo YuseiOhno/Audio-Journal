@@ -1,7 +1,7 @@
 // features/archives/hooks/useFilteredAndSortedRecordings.ts
 import { useMemo } from "react";
 import type { RecordingRow } from "@/core/types/types";
-import { SORT_OPTIONS, type SortKey } from "./useSortMenu";
+import { SORT_OPTIONS, type SortKey } from "@/features/archives/lib/sort";
 
 type Params = {
   rows: RecordingRow[];
