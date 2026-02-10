@@ -2,7 +2,7 @@ import { StyleSheet, Text, View } from "react-native";
 import WaveformBars from "@/features/UI/WaveformBars";
 
 import { RecordButton } from "@/features/recording/components/RecordButton";
-import LevelLineDisplay from "@/features/recording/components/LevelLineDisplay";
+import LevelLineDisplay from "@/features/recording/components/LevelLine";
 import useRecordingScreenController from "@/features/recording/hooks/useRecordingScreenController";
 
 export default function RecordingScreen() {
