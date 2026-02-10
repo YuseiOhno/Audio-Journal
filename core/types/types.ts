@@ -29,3 +29,15 @@ export type RecordingRow = {
   waveform_length: number;
   recording_title: string;
 };
+
+export type RecordingListItem = {
+  id: number;
+  date_key: string;
+  created_at: string;
+  duration_ms: number;
+  lat: number | null;
+  lng: number | null;
+  accuracy: number | null;
+  memo: string;
+  recording_title: string;
+};

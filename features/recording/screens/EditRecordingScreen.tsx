@@ -79,7 +79,7 @@ export default function EditRecordingScreen() {
 
     const patch: Partial<typeof draft> = {};
     if (draft.recording_title === "") patch.recording_title = "Untitled";
-    if (draft.memo === "") patch.memo = "N/A";
+    if (draft.memo === "") patch.memo = "null";
     const finalDraft = { ...draft, ...patch };
 
     try {

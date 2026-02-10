@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 
 import { getRecordingRecordById, getRecordings } from "@/core/db/repositories/recordings";
-import { RecordingRow } from "@/core/types/types";
+import type { RecordingListItem, RecordingRow } from "@/core/types/types";
 import DetailSheet from "../components/DetailSheet";
 import RowCard from "@/features/archives/components/RowCard";
 import SearchBar from "@/features/archives/components/SearchBar";
@@ -17,7 +17,7 @@ import useFilteredAndSortedRecordings from "../hooks/useFilteredAndSortedRecordi
 export default function ArchivesScreen() {
   const [query, setQuery] = useState("");
   const [sortKey, setSortKey] = useState<SortKey>("newest");
-  const [rows, setRows] = useState<RecordingRow[]>([]);
+  const [rows, setRows] = useState<RecordingListItem[]>([]);
   const [selected, setSelected] = useState<RecordingRow>();
   const bottomSheetRef = useRef<BottomSheet>(null);
   const searchInputRef = useRef<TextInput>(null);
