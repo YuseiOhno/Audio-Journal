@@ -1,4 +1,4 @@
-import { Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import WaveformBars from "@/features/UI/WaveformBars";
 
 import { RecordButton } from "@/features/recording/components/RecordButton";
@@ -17,57 +17,67 @@ export default function RecordingScreen() {
   } = useRecordingScreenController();
 
   return (
-    <View style={{ flex: 1, padding: 16, gap: 12, backgroundColor: "#B5B6B6" }}>
+    <View style={styles.container}>
       <LevelLineDisplay recordingInProgress={recordingInProgress} latestDecibel={latestDecibel} />
 
-      <View style={{ flex: 2 }}>
-        <View style={{ flex: 1, flexDirection: "row", alignItems: "flex-end" }}>
-          <WaveformBars
-            values={waveformValues}
-            targetBars={targetBars}
-            containerStyle={{ borderRadius: 25 }}
-            barStyle={{ borderRadius: 2 }}
-          />
+      <View style={styles.waveformSection}>
+        <View style={styles.waveformRow}>
+          <WaveformBars values={waveformValues} targetBars={targetBars} />
         </View>
-        <View
-          style={{
-            flex: 1,
-            justifyContent: "space-between",
-            flexDirection: "row",
-            alignItems: "flex-start",
-          }}
-        >
-          <Text style={{ fontSize: 15, fontWeight: "400", color: "#333333" }}>
-            {remainingSecondsText}
-          </Text>
-          <Text style={{ fontSize: 15, fontWeight: "400", color: "#333333" }}>
-            {latestDecibel.current?.toFixed(1)} db
-          </Text>
+        <View style={styles.statusRow}>
+          <Text style={styles.statusText}>{remainingSecondsText}</Text>
+          <Text style={styles.statusText}>{latestDecibel.current?.toFixed(1)} db</Text>
         </View>
       </View>
-      <View
-        style={{
-          flex: 1,
-          justifyContent: "center",
-          flexDirection: "row",
-          alignItems: "flex-end",
-        }}
-      >
+      <View style={styles.recordButton}>
         <RecordButton
           isRecording={recordingInProgress}
           onPress={onPressRecord}
           disabled={disabled}
         />
       </View>
-      <View
-        style={{
-          flex: 1,
-          flexDirection: "row",
-          justifyContent: "center",
-          alignItems: "flex-end",
-          paddingBottom: 16,
-        }}
-      ></View>
+      <View style={styles.bottomSpacer} />
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 16,
+    gap: 12,
+    backgroundColor: "#B5B6B6",
+  },
+  waveformSection: {
+    flex: 2,
+  },
+  waveformRow: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "flex-end",
+  },
+  statusRow: {
+    flex: 1,
+    justifyContent: "space-between",
+    flexDirection: "row",
+    alignItems: "flex-start",
+  },
+  statusText: {
+    fontSize: 15,
+    fontWeight: "400",
+    color: "#333333",
+  },
+  recordButton: {
+    flex: 1,
+    justifyContent: "center",
+    flexDirection: "row",
+    alignItems: "flex-end",
+  },
+  bottomSpacer: {
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "flex-end",
+    paddingBottom: 16,
+  },
+});

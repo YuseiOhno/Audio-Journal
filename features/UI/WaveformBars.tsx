@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { calcWaveformLayout } from "@/core/lib/waveformLayout";
 import {
   WAVEFORM_BAR_GAP,
@@ -12,17 +12,9 @@ type WaveformBarsProps = {
   values: number[];
   targetBars: number;
   minBarHeight?: number;
-  containerStyle?: StyleProp<ViewStyle>;
-  barStyle?: StyleProp<ViewStyle>;
 };
 
-export default function WaveformBars({
-  values,
-  targetBars,
-  minBarHeight = 0,
-  containerStyle,
-  barStyle,
-}: WaveformBarsProps) {
+export default function WaveformBars({ values, targetBars, minBarHeight = 0 }: WaveformBarsProps) {
   const [containerWidth, setContainerWidth] = useState(0);
 
   const { fitBarWidth, fitGap } = useMemo(
@@ -39,7 +31,7 @@ export default function WaveformBars({
 
   return (
     <View
-      style={[styles.container, containerStyle, { gap: fitGap, borderWidth: WAVEFORM_BORDER_WIDTH }]}
+      style={[styles.container, { gap: fitGap, borderWidth: WAVEFORM_BORDER_WIDTH }]}
       onLayout={(e) => setContainerWidth(e.nativeEvent.layout.width)}
     >
       {values.map((value, index) => (
@@ -47,7 +39,6 @@ export default function WaveformBars({
           key={index}
           style={[
             styles.bar,
-            barStyle,
             {
               height: Math.max(minBarHeight, value * WAVEFORM_DISPLAY_SCALE),
               width: fitBarWidth,
@@ -69,6 +60,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     width: "100%",
     borderColor: "#333333",
+    borderRadius: 25,
   },
   bar: {
     backgroundColor: "#333333",
