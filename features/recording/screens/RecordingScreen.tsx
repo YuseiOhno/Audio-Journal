@@ -1,10 +1,9 @@
-import { Alert, Text, View } from "react-native";
-import { AudioModule } from "expo-audio";
-import * as Location from "expo-location";
+import { Text, View } from "react-native";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useRef } from "react";
 import WaveformBars from "@/features/UI/WaveformBars";
 import useLiveWaveform from "@/features/recording/hooks/useLiveWaveform";
+import useRecordingPermissions from "@/features/recording/hooks/useRecordingPermissions";
 
 import { RecordButton } from "@/features/recording/components/RecordButton";
 import LevelLineDisplay from "@/features/recording/components/LevelLineDisplay";
@@ -28,6 +27,7 @@ export default function RecordingScreen() {
     location,
     sampleIntervalMs,
   } = useAudioRecorderHook();
+  const { mic, ready } = useRecordingPermissions();
 
   const router = useRouter();
   const setDraft = useRecordingDraftStore((state) => state.setDraft);
@@ -41,26 +41,6 @@ export default function RecordingScreen() {
     sampleIntervalMs,
     waveformBufferRef,
   });
-
-  //マイク権限
-  useEffect(() => {
-    (async () => {
-      const status = await AudioModule.requestRecordingPermissionsAsync();
-      if (!status.granted) {
-        Alert.alert("マイク権限が必要です", "設定でマイクを許可してください。");
-      }
-    })();
-  }, []);
-
-  //位置情報権限
-  useEffect(() => {
-    (async () => {
-      const status = await Location.requestForegroundPermissionsAsync();
-      if (!status.granted) {
-        Alert.alert("位置情報の権限が必要です", "設定で位置情報の許可をお願いします。");
-      }
-    })();
-  }, []);
 
   //Draft作成
   const handleStop = useCallback(
@@ -105,6 +85,7 @@ export default function RecordingScreen() {
 
   //録音スタート、ストップ
   const onPressRecord = async () => {
+    if (!ready) return;
     if (recordingInProgress) {
       const result = await stopRecording();
       if (result) {
@@ -152,7 +133,11 @@ export default function RecordingScreen() {
           alignItems: "flex-end",
         }}
       >
-        <RecordButton isRecording={recordingInProgress} onPress={onPressRecord} />
+        <RecordButton
+          isRecording={recordingInProgress}
+          onPress={onPressRecord}
+          disabled={mic === "denied"}
+        />
       </View>
       <View
         style={{
