@@ -11,8 +11,10 @@ import BottomSheet, {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { formatCreatedAtLocal, formatSeconds } from "@/core/lib/format";
+import { STATIC_WAVEFORM_TARGET_BARS } from "@/core/lib/waveformConstants";
 import { RecordingRow } from "@/core/types/types";
-import StaticWaveform from "@/features/archives/components/StaticWaveform";
+import useStaticWaveform from "@/features/archives/hooks/useStaticWaveform";
+import WaveformBars from "@/features/UI/WaveformBars";
 import AudioPlayer from "@/features/archives/components/AudioPlayer";
 import { formatLocationText } from "@/features/archives/lib/archiveFormat";
 
@@ -27,6 +29,11 @@ const DetailSheet = forwardRef<BottomSheet, Props>(function DetailSheet(
 ) {
   const { top } = useSafeAreaInsets();
   const [audioPlayerHeight, setAudioPlayerHeight] = useState(0);
+  const waveformValues = useStaticWaveform({
+    waveform: selected?.waveform_blob,
+    waveformLength: selected?.waveform_length,
+    targetBars: STATIC_WAVEFORM_TARGET_BARS,
+  });
 
   const snapPoints = useMemo<(number | string)[]>(
     () => [Math.max(1, audioPlayerHeight), "100%"],
@@ -106,10 +113,17 @@ const DetailSheet = forwardRef<BottomSheet, Props>(function DetailSheet(
             <Text style={styles.bsMeta}>{selected?.memo}</Text>
 
             <View>
-              <StaticWaveform
-                waveform={selected?.waveform_blob}
-                waveformLength={selected?.waveform_length}
-              />
+              {waveformValues.length === 0 ? (
+                <Text style={styles.emptyWaveform}>null</Text>
+              ) : (
+                <WaveformBars
+                  values={waveformValues}
+                  targetBars={STATIC_WAVEFORM_TARGET_BARS}
+                  minBarHeight={1}
+                  containerStyle={styles.waveformContainer}
+                  barStyle={styles.waveformBar}
+                />
+              )}
             </View>
           </View>
           {mapRegion ? (
@@ -171,6 +185,18 @@ const styles = StyleSheet.create({
     marginTop: 16,
     fontSize: 14,
     color: "#555555",
+  },
+  waveformContainer: {
+    marginTop: 16,
+    borderRadius: 12,
+  },
+  waveformBar: {
+    borderRadius: 2,
+  },
+  emptyWaveform: {
+    marginTop: 16,
+    fontSize: 12,
+    color: "#666666",
   },
   mapContainer: {
     marginTop: 16,

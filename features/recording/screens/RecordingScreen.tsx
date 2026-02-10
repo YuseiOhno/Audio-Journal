@@ -3,9 +3,10 @@ import { AudioModule } from "expo-audio";
 import * as Location from "expo-location";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useRef } from "react";
+import WaveformBars from "@/features/UI/WaveformBars";
+import useLiveWaveform from "@/features/recording/hooks/useLiveWaveform";
 
 import { RecordButton } from "@/features/recording/components/RecordButton";
-import WaveformDisplay from "@/features/recording/components/WaveformDisplay";
 import LevelLineDisplay from "@/features/recording/components/LevelLineDisplay";
 
 import useAudioRecorderHook from "@/features/recording/hooks/useAudioRecorder";
@@ -32,6 +33,14 @@ export default function RecordingScreen() {
   const setDraft = useRecordingDraftStore((state) => state.setDraft);
   const waveformBufferRef = useRef<number[]>([]);
   const autoStopTriggeredRef = useRef(false);
+  const targetBars = Math.ceil(MAX_MS / sampleIntervalMs);
+  const waveformValues = useLiveWaveform({
+    recordingInProgress,
+    latestDecibel,
+    targetBars,
+    sampleIntervalMs,
+    waveformBufferRef,
+  });
 
   //マイク権限
   useEffect(() => {
@@ -112,12 +121,11 @@ export default function RecordingScreen() {
 
       <View style={{ flex: 2 }}>
         <View style={{ flex: 1, flexDirection: "row", alignItems: "flex-end" }}>
-          <WaveformDisplay
-            recordingInProgress={recordingInProgress}
-            latestDecibel={latestDecibel}
-            maxMs={MAX_MS}
-            sampleIntervalMs={sampleIntervalMs}
-            waveformBufferRef={waveformBufferRef}
+          <WaveformBars
+            values={waveformValues}
+            targetBars={targetBars}
+            containerStyle={{ borderRadius: 25 }}
+            barStyle={{ borderRadius: 2 }}
           />
         </View>
         <View
