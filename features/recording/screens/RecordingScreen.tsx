@@ -26,7 +26,7 @@ export default function RecordingScreen() {
         </View>
         <View style={styles.statusRow}>
           <Text style={styles.statusText}>{remainingSecondsText}</Text>
-          <Text style={styles.statusText}>{latestDecibel.current?.toFixed(1)} db</Text>
+          <Text style={styles.statusText}>{latestDecibel.current?.toFixed(1) ?? "- ∞"} db</Text>
         </View>
       </View>
       <View style={styles.recordButton}>

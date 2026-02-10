@@ -17,7 +17,7 @@ const POINT_COUNT = 100;
 const WAVE_CYCLES = 8;
 const STROKE_WIDTH = 2;
 const AMPLITUDE_SCALE = 50;
-const RESET_AMPLITUDE_DURATION_MS = 140;
+const RESET_AMPLITUDE_DURATION_MS = 500;
 
 // 現在の振幅と幅から、1本の波形パスを再生成する。
 const updateWavePath = (
