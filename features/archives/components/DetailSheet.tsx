@@ -171,12 +171,12 @@ const styles = StyleSheet.create({
   },
   moreButtonWrap: {
     paddingVertical: 10,
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
     marginLeft: "auto",
     alignItems: "center",
   },
   contentWrap: {
-    paddingHorizontal: 36,
+    paddingHorizontal: 16,
   },
   bsMeta: {
     marginTop: 8,

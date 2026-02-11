@@ -9,14 +9,15 @@ import useLevelAmplitude from "../hooks/useLevelAmplitude";
 type Props = {
   recordingInProgress: boolean;
   latestDecibel: React.RefObject<number | null>;
+  topInset: number;
 };
 
-const HEIGHT = 120;
+const HEIGHT = 50;
 const Y_MID = HEIGHT / 2;
 const POINT_COUNT = 100;
 const WAVE_CYCLES = 8;
-const STROKE_WIDTH = 2;
-const AMPLITUDE_SCALE = 50;
+const STROKE_WIDTH = 1;
+const AMPLITUDE_SCALE = 25;
 const RESET_AMPLITUDE_DURATION_MS = 500;
 
 // 現在の振幅と幅から、1本の波形パスを再生成する。
@@ -50,7 +51,7 @@ const updateWavePath = (
   }
 };
 
-export default function LevelLineDisplay({ recordingInProgress, latestDecibel }: Props) {
+export default function LevelLine({ recordingInProgress, latestDecibel, topInset }: Props) {
   const [containerWidth, setContainerWidth] = useState(0);
 
   // dB の更新値を Reanimated の shared value（振幅）へ変換する。
@@ -73,7 +74,10 @@ export default function LevelLineDisplay({ recordingInProgress, latestDecibel }:
   });
 
   return (
-    <View style={[styles.container, { width: "100%", height: HEIGHT }]} onLayout={handleLayout}>
+    <View
+      style={[styles.container, { width: "100%", height: HEIGHT, marginTop: topInset }]}
+      onLayout={handleLayout}
+    >
       <Canvas style={{ width: containerWidth, height: HEIGHT }}>
         <Path
           path={animatedPath}

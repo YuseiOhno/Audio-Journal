@@ -23,7 +23,7 @@ export default function useLevelAmplitude({
   useEffect(() => {
     if (!recordingInProgress) {
       // 録音停止時は振幅を 0 へ戻し、波形をフラットに収束させる。
-      amplitude.value = withTiming(0, {
+      amplitude.value = withTiming(1, {
         duration: resetDurationMs,
         easing: Easing.out(Easing.cubic),
       });
