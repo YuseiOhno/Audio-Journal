@@ -30,12 +30,12 @@
 | メイン画面・アーカイブ画面 | Edit画面 |
 | ---- | ---- |
 | <div align="center"><img width="171" height="407" alt="home" src="https://github.com/user-attachments/assets/9a6295c3-ae6c-4571-9ce6-9d9e33aea2c5" /> <img width="171" height="407" alt="archives" src="https://github.com/user-attachments/assets/207cefa8-6fd0-4585-b574-dc27567ba7db" /></div> | <div align="center"><img width="171" height="407" alt="edit_before" src="https://github.com/user-attachments/assets/219b95d0-41f1-44fb-a00f-43487b295334" /> <img width="171" height="407" alt="edit_after" src="https://github.com/user-attachments/assets/6450c577-4a43-46d5-a15d-37eae25a716a" /></div>|
-| シンプルで直感的に操作できるUIを意識し<br>起動後、即座に録音を開始できるUX設計です。 | 録音終了後、タイトル・メモを入力する画面です。<br>詳細画面から再編集する際も同じUIを再利用する設計です。 |
+| シンプルで直感的に操作できるUIを意識し<br>起動後、即座に録音を開始できるUX設計です。 | 録音終了後、タイトル・メモを入力する画面。<br>詳細画面から編集する際も再利用する設計です。 |
 
 | 詳細画面 | オーディオプレイヤー固定・ソート機能 |
 | ---- | ---- |
 |<div align="center"><img width="171" height="407" alt="archives_detail" src="https://github.com/user-attachments/assets/ea52e0b9-e25a-49db-8be1-626bcb8d373b" /> <img width="171" height="407" alt="file_menu" src="https://github.com/user-attachments/assets/f18f50ba-113f-44d8-8d67-265b7fc76e1d" /></div> | <div align="center"><img width="171" height="407" alt="archives_player" src="https://github.com/user-attachments/assets/ecffc8da-fd6a-4e9a-8191-d4ce7f18e520" /> <img width="171" height="407" alt="sort" src="https://github.com/user-attachments/assets/2b2b515c-2097-4111-a629-ad7319a425cc" /></div> |
-| 記録はボトムシートで表示されます。<br>録音時に位置情報を取得し、マップで視覚的に録音場所を確認できるUIにしました。<br>ポップアップメニューからファイルの操作ができます。 | ボトムシートのスナップポイントを2箇所設定してるので、オーディオプレイヤーをヘッダーに固定できます。<br>記録一覧には検索・ソート機能を実装しました。 |
+| 記録はボトムシートで表示されます。<br>録音時に位置情報を取得しマップで視覚的に録音場所を<br>確認できるUIにしました。<br>ポップアップメニューからファイルの操作ができます。 | ボトムシートのスナップポイントを2箇所設定してるので<br>オーディオプレイヤーをヘッダーに固定できます。<br>記録一覧には検索・ソート機能を実装しました。 |
 
 ## ■ 工夫した箇所
 
