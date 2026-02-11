@@ -1,50 +1,60 @@
-# Welcome to your Expo app 👋
+# Audio Journal App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+## ■ アプリ概要
 
-## Get started
+30秒の音声を録音し、タイトル・メモ・位置情報とともに保存できる音声ジャーナルアプリです。
 
-1. Install dependencies
 
-   ```bash
-   npm install
-   ```
+## ■ アプリを作ったキッカケ
 
-2. Start the app
+私は日常を映像や写真ではなく音で記録する、「フィールドレコーディング」を趣味としてます。
 
-   ```bash
-   npx expo start
-   ```
+しかし、ICレコーダーを取り出して録音するまでには手間がかかり<br>
+「今この瞬間を残したい」と思ったときに即座に記録できないこと<br>
+また、既存のレコーダーアプリではパーソナルな記録に寄り添ってないことが不満でした。
 
-In the output, you'll find options to open the app in a
+このアプリはもっと手軽に日々の記憶を留めたい、音からその時の空気を想起させる体験をより身近にしたいという想いから生まれました。
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## ■ アプリに込めた思い
 
-## Get a fresh project
+コロナ禍以降、私にとって時間の流れは、以前よりも早く感じられるようになりました。<br>
+気づけば季節が巡り、年が変わっていく——そんな現代において、音声を残すことには確かな意味があると感じています。
 
-When you're ready, run:
+このアプリは、短い人生の中の「30秒」を切り取り、
+その一瞬を音声という形で作品として残すためのものです。<br>
+日常の中に埋もれてしまう感情や思考を、ぜひこのアプリを通して記録してほしいと思っています。
 
-```bash
-npm run reset-project
-```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## ■ 主なページと機能
+![https://github.com/user-attachments/assets/99f01159-02a0-4a96-aaa0-15f8f1e584c2]("https://github.com/user-attachments/assets/99f01159-02a0-4a96-aaa0-15f8f1e584c2")
 
-## Learn more
+## ■ 使用技術
 
-To learn more about developing your project with Expo, look at the following resources:
+| カテゴリ          | 主要技術                    | 用途                                             |
+| ----------------- | --------------------------- | ------------------------------------------------ |
+| フロントエンド    | React Native + Expo         | iOS/Android向けクロスプラットフォームアプリ開発  |
+| 開発言語          | TypeScript                  | 型安全な実装と保守性向上                         |
+| 画面遷移          | Expo Router                 | ファイルベースルーティングによる画面遷移管理     |
+| 状態管理          | Zustand                     | 録音・編集中データなどのアプリ状態管理           |
+| データベース      | SQLite（expo-sqlite）       | 音声メタデータ（タイトル・メモ等）のローカル保存 |
+| 音声機能          | expo-audio                  | 音声の録音・再生                                 |
+| UI/アニメーション | Tamagui / Reanimated / Skia | UI構築(一部)、アニメーション、波形描画                 |
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
 
-## Join the community
+## ■ DB保存項目(recordings)
 
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+| カラム名          | 型             | 説明                                                              |
+| ----------------- | ------------------- | ----------------------------------------------------------------- |
+| `id`              | `INTEGER`       | 録音レコードを一意に識別するID（主キー）。                        |
+| `date_key`        | `TEXT`    | 日単位でのグルーピングや検索に使う日付キー（例: `2026-02-11`）。  |
+| `created_at`      | `TEXT`    | 録音を作成した日時。              |
+| `audio_uri`       | `TEXT`    | 保存された音声ファイルの保存先URI。再生・共有・削除時に参照する。 |
+| `duration_ms`     | `INTEGER`           | 録音時間（ミリ秒）。                                              |
+| `lat`             | `REAL`    | 録音時に取得した緯度。位置情報が取れない場合は `NULL`。           |
+| `lng`             | `REAL`    | 録音時に取得した経度。位置情報が取れない場合は `NULL`。           |
+| `accuracy`        | `REAL`    | 位置情報の精度（m）。取得不可時は `NULL`。                        |
+| `memo`            | `TEXT`    | 録音に紐づくメモ本文。未入力時は `NULL`。                         |
+| `waveform_blob`   | `BLOB`    | 波形表示用のサンプルデータ本体（バイナリ）。                      |
+| `waveform_length` | `INTEGER` | `waveform_blob` に含まれる波形サンプル数。                        |
+| `recording_title` | `TEXT`    | 録音タイトル。未入力時は `NULL`。                                 |
