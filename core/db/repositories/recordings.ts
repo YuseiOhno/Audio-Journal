@@ -1,9 +1,17 @@
 import { db } from "@/core/db";
-import { fromWaveformBlob, toWaveformBlob } from "@/core/lib/waveformBlob";
+import {
+  fromDbRecordingListRow,
+  fromDbRecordingRow,
+  toInsertRecordingParams,
+  toRecordingDraft,
+  type DbRecordingListRow,
+  type DbRecordingRow,
+} from "@/core/db/repositories/recordingsMapper";
 import type { RecordingDraft } from "@/core/types/types";
 
+//インサート
 export async function insertRecording(data: RecordingDraft) {
-  const waveformBlob = toWaveformBlob(data.waveform);
+  const params = toInsertRecordingParams(data);
 
   const result = await db.runAsync(
     `
@@ -18,46 +26,38 @@ export async function insertRecording(data: RecordingDraft) {
       memo,
       waveform_blob,
       waveform_length,
-      waveform_sample_interval_ms,
       recording_title
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `,
-    [
-      data.dateKey,
-      data.createdAt,
-      data.audioUri,
-      data.durationMs,
-      data.location?.lat ?? null,
-      data.location?.lng ?? null,
-      data.location?.accuracy ?? null,
-      data.memo,
-      waveformBlob,
-      data.waveform.length,
-      data.waveformSampleIntervalMs,
-      data.recording_title,
-    ],
+    [...params],
   );
   return result.lastInsertRowId;
 }
 
 //一覧用のデータを取得
 export async function getRecordings() {
-  const rows: any = await db.getAllAsync(
-    "SELECT id, date_key, created_at, duration_ms, lat, lng, accuracy, recording_title FROM recordings",
+  const rows = await db.getAllAsync<DbRecordingListRow>(
+    "SELECT id, date_key, created_at, duration_ms, lat, lng, accuracy, memo, recording_title FROM recordings",
   );
   if (!rows) return null;
 
-  return rows.map((row: any) => ({
-    ...row,
-  }));
+  return rows.map(fromDbRecordingListRow);
 }
 
 //IDをトリガーにレコードを取得
 export async function getRecordingRecordById(id: number) {
-  const row: any = await db.getFirstAsync("SELECT * FROM recordings WHERE id = ?", [id]);
+  const row = await db.getFirstAsync<DbRecordingRow>("SELECT * FROM recordings WHERE id = ?", [id]);
   if (!row) return null;
 
-  return { ...row, waveform_blob: row.waveform_blob ? fromWaveformBlob(row.waveform_blob) : null };
+  return fromDbRecordingRow(row);
+}
+
+//IDをトリガーにレコードを取得、Draft型に変換
+export async function getRecordingDraftById(id: number) {
+  const row = await getRecordingRecordById(id);
+  if (!row) return null;
+
+  return toRecordingDraft(row);
 }
 
 //IDをトリガーにレコードを削除
@@ -66,7 +66,7 @@ export async function deleteRecordingRecordById(id: number) {
   return result.changes > 0;
 }
 
-//レコードの編集
+//レコードのアップデート
 export async function updateRecordingTitleMemoById(
   id: number,
   patch: { recording_title: string; memo: string },
@@ -76,14 +76,4 @@ export async function updateRecordingTitleMemoById(
     [patch.recording_title, patch.memo, id],
   );
   return result.changes > 0;
-}
-
-//test
-export async function getTest() {
-  const rows: any = await db.getAllAsync("SELECT * FROM recordings");
-  if (!rows) return null;
-
-  return rows.map((row: any) => ({
-    ...row,
-  }));
 }

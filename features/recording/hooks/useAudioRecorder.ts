@@ -12,9 +12,13 @@ import { useSmoothCountdown } from "@/features/recording/hooks/useSmoothCountdow
 import useFetchLocationOnce from "@/features/recording/hooks/useFetchLocationOnce";
 
 import { GeoPoint } from "@/core/types/types";
+import {
+  DEFAULT_WAVEFORM_SAMPLE_INTERVAL_MS,
+  MAX_RECORDING_MS,
+} from "@/core/lib/waveformConstants";
 
-const MAX_MS = 30000;
-const sampleIntervalMs = 200;
+const MAX_MS = MAX_RECORDING_MS;
+const sampleIntervalMs = DEFAULT_WAVEFORM_SAMPLE_INTERVAL_MS;
 
 export default function useAudioRecorderHook() {
   const [createdAt, setCreatedAt] = useState<string | null>(null);

@@ -3,10 +3,11 @@ import { Pressable, StyleSheet, View, Animated, Easing } from "react-native";
 
 type Props = {
   isRecording: boolean;
+  disabled?: boolean;
   onPress: () => void;
 };
 
-export function RecordButton({ isRecording, onPress }: Props) {
+export function RecordButton({ isRecording, disabled = false, onPress }: Props) {
   const scale = useRef(new Animated.Value(1)).current;
   const pulse = useRef(new Animated.Value(0)).current;
   const pulseLoop = useRef<Animated.CompositeAnimation | null>(null);
@@ -56,9 +57,12 @@ export function RecordButton({ isRecording, onPress }: Props) {
   }, [pulse]);
 
   return (
-    <Pressable onPress={onPress}>
+    <Pressable onPress={onPress} disabled={disabled}>
       <Animated.View
-        style={[styles.container, { width: size, height: size, transform: [{ scale }] }]}
+        style={[
+          styles.container,
+          { width: size, height: size, transform: [{ scale }], opacity: disabled ? 0.45 : 1 },
+        ]}
       >
         {/* outer ring */}
         <View

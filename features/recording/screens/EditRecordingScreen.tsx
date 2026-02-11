@@ -1,152 +1,15 @@
-import { useState, useEffect, useLayoutEffect, useCallback } from "react";
-import {
-  View,
-  TextInput,
-  StyleSheet,
-  Keyboard,
-  Platform,
-  Alert,
-  TouchableOpacity,
-} from "react-native";
-
-import { useRecordingDraftStore } from "../store/recordingDraftStore";
-import {
-  getRecordingRecordById,
-  insertRecording,
-  updateRecordingTitleMemoById,
-} from "@/core/db/repositories/recordings";
-import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
+import { useLayoutEffect } from "react";
+import { View, TextInput, StyleSheet, TouchableOpacity } from "react-native";
+import { useNavigation } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { moveRecordingToDocuments } from "../lib/moveRecordingToDocuments";
-import { File } from "expo-file-system";
+import useEditRecordingScreenController from "@/features/recording/hooks/useEditRecordingScreenController";
 
 export default function EditRecordingScreen() {
-  const draft = useRecordingDraftStore((s) => s.draft);
-  const updateDraft = useRecordingDraftStore((s) => s.updateDraft);
-  const clearDraft = useRecordingDraftStore((s) => s.clearDraft);
-  const setDraft = useRecordingDraftStore((s) => s.setDraft);
-
-  const [keyboardHeight, setKeyboardHeight] = useState(0);
-  const router = useRouter();
+  const { draft, updateDraft, keyboardHeight, onSave, onCancel } =
+    useEditRecordingScreenController();
   const navigation = useNavigation();
 
-  const { id } = useLocalSearchParams<{ id?: string }>();
-  const editId = id ? Number(id) : null;
-  const isEditing = Number.isFinite(editId);
-
-  //キーボードの高さを取得
-  useEffect(() => {
-    const show = Keyboard.addListener(
-      Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow",
-      (e) => {
-        setKeyboardHeight(e.endCoordinates.height);
-      },
-    );
-    const hide = Keyboard.addListener(
-      Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide",
-      () => setKeyboardHeight(0),
-    );
-
-    return () => {
-      show.remove();
-      hide.remove();
-    };
-  }, []);
-
-  //既存レコードを読み込む(edit)
-  useEffect(() => {
-    if (!isEditing || editId == null) return;
-    let active = true;
-    (async () => {
-      const record = await getRecordingRecordById(editId);
-      if (!active) return;
-      if (!record) {
-        Alert.alert("録音が見つかりませんでした");
-        router.back();
-        return;
-      }
-      setDraft({
-        dateKey: record.date_key,
-        createdAt: record.created_at,
-        audioUri: record.audio_uri,
-        durationMs: record.duration_ms,
-        location:
-          record.lat == null || record.lng == null
-            ? null
-            : { lat: record.lat, lng: record.lng, accuracy: record.accuracy ?? null },
-        memo: record.memo ?? "",
-        waveform: record.waveform_blob ?? [],
-        waveformSampleIntervalMs: record.waveform_sample_interval_ms,
-        recording_title: record.recording_title ?? "",
-      });
-    })();
-    return () => {
-      active = false;
-    };
-  }, [isEditing, editId, router, setDraft]);
-
-  //DBインサート、アップデート
-  const onSave = useCallback(async () => {
-    if (!draft) return;
-
-    const patch: Partial<typeof draft> = {};
-    if (draft.recording_title === "") patch.recording_title = "Untitled";
-    if (draft.memo === "") patch.memo = "N/A";
-    const finalDraft = { ...draft, ...patch };
-
-    try {
-      //アップデート
-      if (isEditing && editId != null) {
-        await updateRecordingTitleMemoById(editId, {
-          recording_title: finalDraft.recording_title,
-          memo: finalDraft.memo,
-        });
-        clearDraft();
-        router.navigate({
-          pathname: "/(tabs)/archives",
-          params: { openId: String(editId) },
-        });
-        return;
-      }
-
-      //インサート
-      if (finalDraft.audioUri) {
-        const newUri = await moveRecordingToDocuments(finalDraft.audioUri);
-        finalDraft.audioUri = newUri;
-      }
-      const newId = await insertRecording(finalDraft);
-      clearDraft();
-      router.navigate({
-        pathname: "/(tabs)/archives",
-        params: { openId: String(newId) },
-      });
-    } catch (e: any) {
-      Alert.alert("保存に失敗しました", String(e?.message ?? e));
-    }
-  }, [draft, clearDraft, router, isEditing, editId]);
-
-  //キャンセル
-  const onCancel = useCallback(async () => {
-    try {
-      if (!isEditing && draft?.audioUri) {
-        const file = new File(draft.audioUri);
-        file.delete();
-      }
-      clearDraft();
-      if (isEditing) {
-        router.navigate({
-          pathname: "/(tabs)/archives",
-          params: { openId: String(editId) },
-        });
-        return;
-      }
-      router.navigate("/(tabs)");
-    } catch (e: any) {
-      Alert.alert(String(e?.message ?? e));
-    }
-  }, [draft, clearDraft, router, editId, isEditing]);
-
-  //ヘッダーボタン
+  // ヘッダーボタン
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (

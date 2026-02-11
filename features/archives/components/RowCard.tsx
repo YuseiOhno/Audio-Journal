@@ -1,11 +1,11 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { formatCreatedAtLocal, formatSeconds } from "@/core/lib/format";
-import { RecordingRow } from "@/core/types/types";
+import type { RecordingListItem } from "@/core/types/types";
 import { formatLocationText, getDateParts } from "@/features/archives/lib/archiveFormat";
 
 type Props = {
-  item: RecordingRow;
-  onPress: (item: RecordingRow) => void;
+  item: RecordingListItem;
+  onPress: (item: RecordingListItem) => void;
 };
 
 export default function RowCard({ item, onPress }: Props) {

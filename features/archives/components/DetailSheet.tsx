@@ -11,8 +11,10 @@ import BottomSheet, {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { formatCreatedAtLocal, formatSeconds } from "@/core/lib/format";
+import { STATIC_WAVEFORM_TARGET_BARS } from "@/core/lib/waveformConstants";
 import { RecordingRow } from "@/core/types/types";
-import StaticWaveform from "@/features/archives/components/StaticWaveform";
+import useStaticWaveform from "@/features/archives/hooks/useStaticWaveform";
+import WaveformBars from "@/features/UI/WaveformBars";
 import AudioPlayer from "@/features/archives/components/AudioPlayer";
 import { formatLocationText } from "@/features/archives/lib/archiveFormat";
 
@@ -27,7 +29,13 @@ const DetailSheet = forwardRef<BottomSheet, Props>(function DetailSheet(
 ) {
   const { top } = useSafeAreaInsets();
   const [audioPlayerHeight, setAudioPlayerHeight] = useState(0);
+  const waveformValues = useStaticWaveform({
+    waveform: selected?.waveform_blob,
+    waveformLength: selected?.waveform_length,
+    targetBars: STATIC_WAVEFORM_TARGET_BARS,
+  });
 
+  // フッター(AudioPlayer)の実測高さを1段目のスナップポイントに使う
   const snapPoints = useMemo<(number | string)[]>(
     () => [Math.max(1, audioPlayerHeight), "100%"],
     [audioPlayerHeight],
@@ -35,6 +43,7 @@ const DetailSheet = forwardRef<BottomSheet, Props>(function DetailSheet(
 
   const lat = selected?.lat;
   const lng = selected?.lng;
+  // 緯度経度が両方ある場合のみMapを表示する
   const hasCoordinates = lat != null && lng != null;
   const mapRegion = hasCoordinates
     ? {
@@ -45,6 +54,7 @@ const DetailSheet = forwardRef<BottomSheet, Props>(function DetailSheet(
       }
     : null;
 
+  // 親から受け取ったref経由でBottomSheetを閉じる
   const closeSheet = () => {
     if (ref && "current" in ref) {
       ref.current?.close();
@@ -69,6 +79,7 @@ const DetailSheet = forwardRef<BottomSheet, Props>(function DetailSheet(
           <BottomSheetFooter {...props}>
             <View
               onLayout={(e) => {
+                // 高さ変化時だけ更新して再レンダリングを抑える
                 const h = Math.round(e.nativeEvent.layout.height);
                 setAudioPlayerHeight((prev) => (prev === h ? prev : h));
               }}
@@ -105,12 +116,16 @@ const DetailSheet = forwardRef<BottomSheet, Props>(function DetailSheet(
             <Text style={styles.bsMemo}>- Memo -</Text>
             <Text style={styles.bsMeta}>{selected?.memo}</Text>
 
-            <View>
-              <StaticWaveform
-                waveform={selected?.waveform_blob}
-                waveformLength={selected?.waveform_length}
-                waveformSampleIntervalMs={selected?.waveform_sample_interval_ms}
-              />
+            <View style={styles.waveformContainer}>
+              {waveformValues.length === 0 ? (
+                <Text style={styles.emptyWaveform}>null</Text>
+              ) : (
+                <WaveformBars
+                  values={waveformValues}
+                  targetBars={STATIC_WAVEFORM_TARGET_BARS}
+                  minBarHeight={1}
+                />
+              )}
             </View>
           </View>
           {mapRegion ? (
@@ -156,12 +171,12 @@ const styles = StyleSheet.create({
   },
   moreButtonWrap: {
     paddingVertical: 10,
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
     marginLeft: "auto",
     alignItems: "center",
   },
   contentWrap: {
-    paddingHorizontal: 36,
+    paddingHorizontal: 16,
   },
   bsMeta: {
     marginTop: 8,
@@ -172,6 +187,13 @@ const styles = StyleSheet.create({
     marginTop: 16,
     fontSize: 14,
     color: "#555555",
+  },
+  waveformContainer: {
+    marginTop: 16,
+  },
+  emptyWaveform: {
+    fontSize: 12,
+    color: "#666666",
   },
   mapContainer: {
     marginTop: 16,

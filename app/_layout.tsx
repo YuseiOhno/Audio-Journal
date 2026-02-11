@@ -5,6 +5,11 @@ import { initDB } from "@/core/db";
 import { TamaguiProvider } from "@tamagui/core";
 import { config } from "@/tamagui.config";
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
+import { configureReanimatedLogger } from "react-native-reanimated";
+
+configureReanimatedLogger({
+  strict: false,
+});
 
 export default function RootLayout() {
   const [ready, setReady] = useState(false);

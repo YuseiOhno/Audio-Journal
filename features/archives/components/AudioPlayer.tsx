@@ -3,7 +3,7 @@ import React from "react";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 import { Slider } from "@tamagui/slider";
-import { View, Pressable, Text } from "react-native";
+import { View, Pressable, Text, StyleSheet } from "react-native";
 import useAudioPlayerHook from "@/features/archives/hooks/useAudioPlayer";
 import { formatTime } from "@/core/lib/format";
 
@@ -19,9 +19,9 @@ export default function AudioPlayer({ audioUri }: AudioPlayerProps) {
   const currentTimeMs = Math.round((status?.currentTime ?? 0) * 1000);
 
   return (
-    <View style={{ width: "100%" }}>
-      <View style={{ flexDirection: "column", height: 60 }}>
-        <View style={{ flexDirection: "row", alignItems: "center", marginTop: 30 }}>
+    <View style={styles.container}>
+      <View style={styles.progressSection}>
+        <View style={styles.sliderWrap}>
           <Slider
             value={[Math.min(currentTimeMs, durationMs)]}
             min={0}
@@ -39,27 +39,12 @@ export default function AudioPlayer({ audioUri }: AudioPlayerProps) {
             <Slider.Thumb circular index={0} opacity={0} />
           </Slider>
         </View>
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginTop: 10,
-          }}
-        >
-          <Text style={{ fontSize: 14 }}>{formatTime(currentTimeMs / 1000)}</Text>
-          <Text style={{ fontSize: 14 }}>{formatTime(durationMs / 1000)}</Text>
+        <View style={styles.timeRow}>
+          <Text style={styles.timeText}>{formatTime(currentTimeMs / 1000)}</Text>
+          <Text style={styles.timeText}>{formatTime(durationMs / 1000)}</Text>
         </View>
       </View>
-      <View
-        style={{
-          flexDirection: "row",
-          justifyContent: "center",
-          alignItems: "center",
-          gap: "25",
-          height: 60,
-        }}
-      >
+      <View style={styles.controlRow}>
         {/* 10秒戻る */}
         <Pressable onPress={seekToReplay} style={pressableOpacity}>
           <MaterialIcons name="replay-10" size={35} color="#333333" />
@@ -84,3 +69,34 @@ export default function AudioPlayer({ audioUri }: AudioPlayerProps) {
 }
 
 const pressableOpacity = ({ pressed }: { pressed: boolean }) => [{ opacity: pressed ? 0.6 : 1 }];
+
+const styles = StyleSheet.create({
+  container: {
+    width: "100%",
+  },
+  progressSection: {
+    flexDirection: "column",
+    height: 60,
+  },
+  sliderWrap: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 30,
+  },
+  timeRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 10,
+  },
+  timeText: {
+    fontSize: 14,
+  },
+  controlRow: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 25,
+    height: 60,
+  },
+});
