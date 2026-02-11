@@ -1,4 +1,4 @@
-# Audio Journal App
+# mussan.
 
 ## ■ アプリ概要
 
@@ -27,19 +27,45 @@
 
 
 ## ■ 主なページと機能
-![https://github.com/user-attachments/assets/99f01159-02a0-4a96-aaa0-15f8f1e584c2]("https://github.com/user-attachments/assets/99f01159-02a0-4a96-aaa0-15f8f1e584c2")
+| メイン画面・アーカイブ画面 | Edit画面 |
+| ---- | ---- |
+| <img width="201" height="437" alt="home" src="https://github.com/user-attachments/assets/9a6295c3-ae6c-4571-9ce6-9d9e33aea2c5" /> <img width="201" height="437" alt="archives" src="https://github.com/user-attachments/assets/207cefa8-6fd0-4585-b574-dc27567ba7db" /> | <img width="201" height="437" alt="edit_before" src="https://github.com/user-attachments/assets/219b95d0-41f1-44fb-a00f-43487b295334" /> <img width="201" height="437" alt="edit_after" src="https://github.com/user-attachments/assets/6450c577-4a43-46d5-a15d-37eae25a716a" />|
+| シンプルで直感的に操作できるUIを意識し<br>起動後、即座に録音を開始できるUX設計です。 | 録音終了後、タイトル・メモを入力する画面です。<br>詳細画面から再編集する際も同じUIを再利用する設計です。 |
 
-## ■ 使用技術
+| 詳細画面 | プレイヤー固定・ソート機能 |
+| ---- | ---- |
+|<div align="center"><img width="201" height="437" alt="archives_detail" src="https://github.com/user-attachments/assets/ea52e0b9-e25a-49db-8be1-626bcb8d373b" /> <img width="201" height="437" alt="file_menu" src="https://github.com/user-attachments/assets/f18f50ba-113f-44d8-8d67-265b7fc76e1d" /></div> | <div align="center"><img width="201" height="437" alt="archives_player" src="https://github.com/user-attachments/assets/ecffc8da-fd6a-4e9a-8191-d4ce7f18e520" /> <img width="201" height="437" alt="sort" src="https://github.com/user-attachments/assets/2b2b515c-2097-4111-a629-ad7319a425cc" /></div> |
+| 記録はボトムシートで表示されます。<br>録音時に位置情報を取得し、マップで視覚的に録音場所を確認できるUIにしました。<br>ポップアップメニューからファイルの操作ができます。 | プレイヤーはボトムシートのスナップポイントを2箇所設定してるのでヘッダーに固定できます。<br>記録一覧には検索・ソート機能を実装しました。 |
+
+## ■ 工夫した箇所
+
+#### 機能単位のディレクトリ構成
+- featuresディレクトリを採用し、機能単位でコードを整理してます。
+- 各featuresにはscreen・hook・componentなど責務に応じてファイルを閉じてます。
+
+#### 一時状態と永続化の段階分離
+- 録音後のキャンセルに対応するため、録音直後は`Zustand`のDraftに状態を保持し、タイトル・メモ編集後に`SQLite`へ保存する2段階フローで実装しました。
+
+#### UIスレッド描画
+- 録音中の波形描画では、`Reanimated`のshared valueと`Skia`のworkletを組み合わせ、パス生成処理をUIスレッド側で実行しています。
+
+#### マイグレーション前提のスキーマ管理
+- 将来拡張のためLATEST_VERSIONとmigration群で段階的に更新できるよう設計しました。
+
+
+
+## ■ 主な使用技術
 
 | カテゴリ          | 主要技術                    | 用途                                             |
 | ----------------- | --------------------------- | ------------------------------------------------ |
-| フロントエンド    | React Native + Expo         | iOS/Android向けクロスプラットフォームアプリ開発  |
-| 開発言語          | TypeScript                  | 型安全な実装と保守性向上                         |
-| 画面遷移          | Expo Router                 | ファイルベースルーティングによる画面遷移管理     |
-| 状態管理          | Zustand                     | 録音・編集中データなどのアプリ状態管理           |
-| データベース      | SQLite（expo-sqlite）       | 音声メタデータ（タイトル・メモ等）のローカル保存 |
-| 音声機能          | expo-audio                  | 音声の録音・再生                                 |
-| UI/アニメーション | Tamagui / Reanimated / Skia | UI構築(一部)、アニメーション、波形描画                 |
+| フロントエンド | React Native + Expo | iOS/Android向けクロスプラットフォームアプリ開発 |
+| 開発言語 | TypeScript | 型安全な実装と保守性向上 |
+| 画面遷移 | Expo Router | ファイルベースルーティングによる画面遷移管理 |
+| 状態管理 | Zustand | 録音・編集中データなどのアプリ状態管理 |
+| データベース | SQLite（expo-sqlite） | 音声メタデータ（タイトル・メモ等）のローカル保存 |
+| 音声機能 | expo-audio | 音声の録音・再生 |
+| 位置情報 | expo-location | 位置情報の取得 |
+| UI/アニメーション | Tamagui / Reanimated / Skia | UI構築(一部)、アニメーション、波形描画 |
 
 
 ## ■ DB保存項目(recordings)
