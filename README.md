@@ -1,4 +1,7 @@
-# mussan.
+# Audio Journal
+
+<img width="1423" height="808" alt="無題" src="https://github.com/user-attachments/assets/5be0a25e-40c4-433b-8535-0f3ad69e1109" />
+
 
 ## ■ アプリ概要
 
