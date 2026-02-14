@@ -1,4 +1,3 @@
-// features/recording/store/recordingDraftStore.ts
 import { create } from "zustand";
 import type { RecordingDraft } from "@/core/types/types";
 
