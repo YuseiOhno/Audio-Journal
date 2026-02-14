@@ -85,5 +85,3 @@
 | `waveform_blob`   | `BLOB`    | 波形表示用のサンプルデータ本体（バイナリ）。                      |
 | `waveform_length` | `INTEGER` | `waveform_blob` に含まれる波形サンプル数。                        |
 | `recording_title` | `TEXT`    | 録音タイトル。未入力時は `NULL`。                                 |
-
-## 8. 今後の改善案
