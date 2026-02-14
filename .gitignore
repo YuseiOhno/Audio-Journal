@@ -40,7 +40,8 @@ yarn-error.*
 /ios
 /android
 
-# memo
-/document
-
+# editor / docs
 .vscode/
+document/
+
+
